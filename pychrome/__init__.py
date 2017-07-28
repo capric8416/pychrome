@@ -22,7 +22,7 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 
 __all__ = ["Chrome", "Tab"]
@@ -45,7 +45,7 @@ class GenericAttr(object):
         return functools.partial(self.tab.call_method, _method="%s.%s" % (self.name, item))
 
     def __setattr__(self, key, value):
-        self.tab.events["%s.%s" % (self.name, key)] = value
+        self.tab.event_handlers["%s.%s" % (self.name, key)] = value
 
 
 class Tab(object):
@@ -58,9 +58,10 @@ class Tab(object):
         self.desc = kwargs.get("description")
 
         self.cur_id = 1000
-        self.events = {}
+        self.event_handlers = {}
         self.method_results = {}
         self.event_queue = queue.Queue()
+
         self.ws = None
         self.ws_send_lock = threading.RLock()
 
@@ -84,8 +85,8 @@ class Tab(object):
 
         try:
             return self.method_results[message['id']].get(timeout=timeout)
-        except:  # TODO:
-            raise ChromeTimeoutException("this timeout")
+        except queue.Empty:
+            raise ChromeTimeoutException("Send command %s timeout" % message['method'])
         finally:
             self.method_results.pop(message['id'])
 
@@ -96,6 +97,8 @@ class Tab(object):
                 message = json.loads(self.ws.recv())
             except websocket.WebSocketTimeoutException:
                 continue
+            except websocket.WebSocketConnectionClosedException:
+                return
 
             if "method" in message:
                 logger.debug("[*] recv event: %s" % message["method"])
@@ -115,9 +118,9 @@ class Tab(object):
             except queue.Empty:
                 continue
 
-            if event['method'] in self.events:
+            if event['method'] in self.event_handlers:
                 try:
-                    self.events[event['method']](**event['params'])
+                    self.event_handlers[event['method']](**event['params'])
                 except Exception as e:
                     logger.error("[-] callback %s error: %s" % (event['method'], str(e)))
 
@@ -136,26 +139,29 @@ class Tab(object):
 
     def set_listener(self, event, callback):
         if not callback:
-            return self.events.pop(event, None)
+            return self.event_handlers.pop(event, None)
 
-        self.events[event] = callback
+        self.event_handlers[event] = callback
         return True
 
     def start(self):
         assert self.websocket_url, "has another client connect to this tab"
+        assert not self.is_stop, "This tab has been working"
 
-        # TODO: init all members
-        self.event_queue = queue.Queue()
         self.ws = websocket.create_connection(self.websocket_url)
-        self.ws.settimeout(self.timeout)
-        self.recv_th = threading.Thread(target=self._recv_loop)
-        self.handle_event_th = threading.Thread(self._handle_event_loop)
+        self.is_stop = False
+
+        self.recv_th = threading.Thread(target=self._recv_loop, daemon=True)
+        self.handle_event_th = threading.Thread(target=self._handle_event_loop, daemon=True)
+        self.recv_th.start()
+        self.handle_event_th.start()
 
     def stop(self):
         self.is_stop = True
         self.ws.close()
 
     def wait(self, timeout=None):
+        # TODO
         self.recv_th.join(timeout)
         self.handle_event_th.join(timeout)
 
@@ -202,8 +208,13 @@ class Chrome(object):
         return rp.text
 
     def version(self):
-        rp = requests.get("%s/json/version" % self.dev_url)
-        return rp.text
+        rp = requests.get("%s/json/version" % self.dev_url, json=True)
+        return rp.json()
 
     def inspect_tab(self, tab_id):
         pass
+
+    def __str__(self):
+        return '<Chrome %s>' % self.dev_url
+
+    __repr__ = __str__
