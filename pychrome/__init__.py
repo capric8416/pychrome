@@ -3,18 +3,17 @@
 
 from __future__ import unicode_literals
 
-import gevent
-import gevent.lock
-import gevent.queue
-import gevent.monkey
-
-gevent.monkey.patch_socket()
-
 import logging
 import functools
+import threading
 
 import requests
 import websocket
+
+try:
+    import Queue as queue
+except ImportError:
+    import queue
 
 try:
     import simplejson as json
@@ -29,7 +28,11 @@ logging.basicConfig(level=logging.DEBUG)
 __all__ = ["Chrome", "Tab"]
 
 
-class ChromeException(Exception):
+class ChromeCallMethodException(Exception):
+    pass
+
+
+class ChromeTimeoutException(Exception):
     pass
 
 
@@ -54,37 +57,42 @@ class Tab(object):
         self.websocket_url = kwargs.get("webSocketDebuggerUrl")
         self.desc = kwargs.get("description")
 
-        self.timeout = kwargs.pop("timeout", 5)
-
         self.cur_id = 1000
         self.events = {}
         self.method_results = {}
-        self.event_queue = gevent.queue.Queue()
+        self.event_queue = queue.Queue()
         self.ws = None
-        self.ws_send_lock = gevent.lock.RLock()
+        self.ws_send_lock = threading.RLock()
 
-        self.recv_gr = None
-        self.handle_event_gr = None
+        self.recv_th = None
+        self.handle_event_th = None
+
+        self.is_stop = False
 
     def _send(self, message):
+        timeout = message.pop('_timeout', None)
+
         if 'id' not in message:
             self.cur_id += 1
             message['id'] = self.cur_id
 
         logger.debug("[*] send message: %s %s" % (message["id"], message['method']))
-        self.method_results[message['id']] = gevent.queue.Queue()
+        self.method_results[message['id']] = queue.Queue()
 
         with self.ws_send_lock:
             self.ws.send(json.dumps(message))
 
         try:
-            return self.method_results[message['id']].get()
+            return self.method_results[message['id']].get(timeout=timeout)
+        except:  # TODO:
+            raise ChromeTimeoutException("this timeout")
         finally:
             self.method_results.pop(message['id'])
 
     def _recv_loop(self):
-        while True:
+        while not self.is_stop:
             try:
+                self.ws.settimeout(1)
                 message = json.loads(self.ws.recv())
             except websocket.WebSocketTimeoutException:
                 continue
@@ -101,10 +109,10 @@ class Tab(object):
                 logger.warning("[-] unknown message: %s" % message)
 
     def _handle_event_loop(self):
-        while True:
+        while not self.is_stop:
             try:
-                event = self.event_queue.get(timeout=self.timeout)
-            except gevent.queue.Empty:
+                event = self.event_queue.get(timeout=1)
+            except queue.Empty:
                 continue
 
             if event['method'] in self.events:
@@ -122,7 +130,7 @@ class Tab(object):
         result = self._send({"method": _method, "params": kwargs})
         if 'result' not in result and 'error' in result:
             logger.error("[-] %s error: %s" % (_method, result['error']['message']))
-            raise ChromeException(result['error']['message'])
+            raise ChromeCallMethodException("calling method: %s error: %s" % (_method, result['error']['message']))
 
         return result['result']
 
@@ -136,18 +144,25 @@ class Tab(object):
     def start(self):
         assert self.websocket_url, "has another client connect to this tab"
 
+        # TODO: init all members
+        self.event_queue = queue.Queue()
         self.ws = websocket.create_connection(self.websocket_url)
         self.ws.settimeout(self.timeout)
-        self.recv_gr = gevent.spawn(self._recv_loop)
-        self.handle_event_gr = gevent.spawn(self._handle_event_loop)
+        self.recv_th = threading.Thread(target=self._recv_loop)
+        self.handle_event_th = threading.Thread(self._handle_event_loop)
 
     def stop(self):
-        self.recv_gr.kill()
-        self.handle_event_gr.kill()
+        self.is_stop = True
         self.ws.close()
 
     def wait(self, timeout=None):
-        gevent.wait([self.recv_gr, self.handle_event_gr], timeout=timeout)
+        self.recv_th.join(timeout)
+        self.handle_event_th.join(timeout)
+
+    def __str__(self):
+        return "<Tab [%s] %s>" % (self.id, self.url)
+
+    __repr__ = __str__
 
 
 class Chrome(object):
@@ -186,8 +201,9 @@ class Chrome(object):
         self.tabs.pop(tab_id, None)
         return rp.text
 
-    def inspect_tab(self, tab_id):
-        pass
-
     def version(self):
+        rp = requests.get("%s/json/version" % self.dev_url)
+        return rp.text
+
+    def inspect_tab(self, tab_id):
         pass

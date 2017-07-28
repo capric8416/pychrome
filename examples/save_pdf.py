@@ -63,7 +63,7 @@ def main():
         tab.Page.navigate(url=urls[i])
 
     for tab in tabs:
-        tab.wait(600)
+        tab.wait(60)
         chrome.close_tab(tab.id)
 
     print('Done')
