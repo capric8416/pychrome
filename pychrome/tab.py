@@ -31,10 +31,16 @@ class GenericAttr(object):
         self.__dict__['tab'] = tab
 
     def __getattr__(self, item):
-        return functools.partial(self.tab.call_method, "%s.%s" % (self.name, item))
+        full_method_name = "%s.%s" % (self.name, item)
+        event_listener = self.tab.get_listener(full_method_name)
+
+        if event_listener:
+            return event_listener
+
+        return functools.partial(self.tab.call_method, full_method_name)
 
     def __setattr__(self, key, value):
-        self.tab.event_handlers["%s.%s" % (self.name, key)] = value
+        self.tab.set_listener("%s.%s" % (self.name, key), value)
 
 
 class Tab(object):
@@ -172,7 +178,7 @@ class Tab(object):
         self.ws.close()
 
     def wait(self, timeout=None):
-        self._stopped.wait(timeout)
+        return self._stopped.wait(timeout)
 
     def __str__(self):
         return "<Tab [%s] %s>" % (self.id, self.url)

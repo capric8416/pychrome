@@ -4,73 +4,164 @@ import time
 import pychrome
 
 
-def close_all_tabs(chrome):
-    for tab in chrome.list_tab():
-        chrome.close_tab(tab.id)
+def close_all_tabs(browser):
+    if len(browser.list_tab()) == 0:
+        return
+
+    for tab in browser.list_tab():
+        browser.close_tab(tab.id)
 
     time.sleep(1)
-    assert len(chrome.list_tab()) == 0
+    assert len(browser.list_tab()) == 0
 
 
 def setup_function(function):
-    chrome = pychrome.Browser()
-    close_all_tabs(chrome)
+    browser = pychrome.Browser()
+    close_all_tabs(browser)
+
+
+def teardown_function(function):
+    browser = pychrome.Browser()
+    close_all_tabs(browser)
 
 
 def test_normal_callmethod():
-    chrome = pychrome.Browser()
-    tab = chrome.new_tab()
+    browser = pychrome.Browser()
+    tab = browser.new_tab()
 
     tab.start()
     result = tab.Page.navigate(url="http://www.fatezero.org")
     assert result['frameId']
 
+    time.sleep(1)
     result = tab.Runtime.evaluate(expression="document.domain")
 
-    time.sleep(1)
     assert result['result']['type'] == 'string'
     assert result['result']['value'] == 'www.fatezero.org'
 
 
 def test_invalid_method():
-    chrome = pychrome.Browser()
-    tab = chrome.new_tab()
+    browser = pychrome.Browser()
+    tab = browser.new_tab()
 
     tab.start()
     try:
         tab.Page.NotExistMethod()
-        assert 0, "should not run to this"
-    except pychrome.CallMethodException as e:
+        assert False, "never get here"
+    except pychrome.CallMethodException:
         pass
 
 
 def test_invalid_params():
-    chrome = pychrome.Browser()
-    tab = chrome.new_tab()
+    browser = pychrome.Browser()
+    tab = browser.new_tab()
 
     tab.start()
     try:
         tab.Page.navigate()
-        assert 0, "should not run to this"
-    except pychrome.CallMethodException as e:
+        assert False, "never get here"
+    except pychrome.CallMethodException:
         pass
 
     try:
-        tab.Page.navigate("http://fatezero.org")
-        assert 0, "should not run to this"
-    except pychrome.CallMethodException as e:
+        tab.Page.navigate("http://www.fatezero.org")
+        assert False, "never get here"
+    except pychrome.CallMethodException:
         pass
 
     try:
-        tab.Page.navigate(invalid_params="http://fatezero.org")
-        assert 0, "should not run to this"
-    except pychrome.CallMethodException as e:
+        tab.Page.navigate(invalid_params="http://www.fatezero.org")
+        assert False, "never get here"
+    except pychrome.CallMethodException:
         pass
 
     try:
-        tab.Page.navigate(url="http://fatezero.org", invalid_params=123)
-    except pychrome.CallMethodException as e:
-        assert 0, "should not run to this"
+        tab.Page.navigate(url="http://www.fatezero.org", invalid_params=123)
+    except pychrome.CallMethodException:
+        assert False, "never get here"
 
 
+def test_set_event_listener():
+    browser = pychrome.Browser()
+    tab = browser.new_tab()
 
+    def request_will_be_sent(**kwargs):
+        tab.stop()
+
+    tab.Network.requestWillBeSent = request_will_be_sent
+    tab.start()
+    tab.Network.enable()
+    tab.Page.navigate(url="chrome://newtab/")
+
+    if not tab.wait():
+        assert False, "never get here"
+
+
+def test_get_event_listener():
+    browser = pychrome.Browser()
+    tab = browser.new_tab()
+
+    def request_will_be_sent(**kwargs):
+        tab.stop()
+
+    tab.Network.requestWillBeSent = request_will_be_sent
+    tab.start()
+    tab.Network.enable()
+    tab.Page.navigate(url="chrome://newtab/")
+
+    if not tab.wait():
+        assert False, "never get here"
+
+    assert tab.Network.requestWillBeSent == request_will_be_sent
+
+
+def test_reuse_tab():
+    browser = pychrome.Browser()
+    tab = browser.new_tab()
+
+    def request_will_be_sent(**kwargs):
+        tab.stop()
+
+    tab.Network.requestWillBeSent = request_will_be_sent
+    tab.start()
+    tab.Network.enable()
+    tab.Page.navigate(url="chrome://newtab/")
+
+    if not tab.wait():
+        assert False, "never get here"
+
+    tab.start()
+    tab.Network.enable()
+    tab.Page.navigate(url="http://www.fatezero.org")
+
+    if not tab.wait():
+        assert False, "never get here"
+
+
+def test_del_event_listener():
+    browser = pychrome.Browser()
+    tab = browser.new_tab()
+
+    def request_will_be_sent(**kwargs):
+        tab.stop()
+
+    tab.Network.requestWillBeSent = request_will_be_sent
+    tab.start()
+    tab.Network.enable()
+    tab.Page.navigate(url="chrome://newtab/")
+
+    if not tab.wait():
+        assert False, "never get here"
+
+    # simply set None
+    tab.Network.requestWillBeSent = None
+    tab.start()
+    tab.Network.enable()
+    tab.Page.navigate(url="http://www.fatezero.org")
+
+    if tab.wait(timeout=5):
+        assert False, "never get here"
+
+
+def test_del_all_event_listener():
+    pass
