@@ -34,7 +34,7 @@ def test_chrome_list():
 
 def test_chrome_new():
     chrome = pychrome.Chrome()
-    chrome.new_tab()
+    tab = chrome.new_tab()
 
 
 def test_chrome_new_10_tabs():

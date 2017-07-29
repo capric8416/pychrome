@@ -17,7 +17,7 @@ def setup_function(function):
     close_all_tabs(chrome)
 
 
-def test_xxx():
+def test_normal_callmethod():
     chrome = pychrome.Chrome()
     tab = chrome.new_tab()
 
@@ -27,6 +27,7 @@ def test_xxx():
 
     result = tab.Runtime.evaluate(expression="document.domain")
 
+    time.sleep(1)
     assert result['result']['type'] == 'string'
     assert result['result']['value'] == 'www.fatezero.org'
 

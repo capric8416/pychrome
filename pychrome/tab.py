@@ -10,6 +10,8 @@ import threading
 
 import websocket
 
+from pychrome.exceptions import *
+
 try:
     import Queue as queue
 except ImportError:
@@ -50,17 +52,18 @@ class Tab(object):
         self.event_queue = queue.Queue()
 
         self.ws = None
-        self.ws_send_lock = threading.RLock()
+        self.ws_send_lock = threading.Lock()
 
         self.recv_th = None
         self.handle_event_th = None
 
-        self._started = threading.Event()
         self._stopped = threading.Event()
-
-        self.is_stop = True
+        self._stopped.set()
 
     def _send(self, message):
+        if self._stopped.is_set():
+            raise ChromeRuntimeException("Tab is not started")
+
         timeout = message.pop('_timeout', None)
 
         if 'id' not in message:
@@ -71,8 +74,6 @@ class Tab(object):
         self.method_results[message['id']] = queue.Queue()
 
         with self.ws_send_lock:
-            if self.is_stop:
-                self.start()
             self.ws.send(json.dumps(message))
 
         try:
@@ -83,7 +84,7 @@ class Tab(object):
             self.method_results.pop(message['id'])
 
     def _recv_loop(self):
-        while not self.is_stop:
+        while not self._stopped.is_set():
             try:
                 self.ws.settimeout(1)
                 message = json.loads(self.ws.recv())
@@ -104,7 +105,7 @@ class Tab(object):
                 logger.warning("[-] unknown message: %s" % message)
 
     def _handle_event_loop(self):
-        while not self.is_stop:
+        while not self._stopped.is_set():
             try:
                 event = self.event_queue.get(timeout=1)
             except queue.Empty:
@@ -136,34 +137,42 @@ class Tab(object):
         if not callback:
             return self.event_handlers.pop(event, None)
 
-        assert callable(callback), "callback should be callable"
+        if not callable(callback):
+            raise ChromeRuntimeException("callback should be callable")
 
         self.event_handlers[event] = callback
         return True
+
+    def get_listener(self, event):
+        return self.event_handlers.get(event, None)
 
     def del_all_listeners(self):
         self.event_handlers = {}
         return True
 
     def start(self):
-        assert self.websocket_url, "has another client connect to this tab"
+        if not self.websocket_url:
+            raise ChromeRuntimeException("Has another client connect to this tab")
 
+        if not self._stopped.is_set():
+            raise ChromeRuntimeException("Tab has been started")
+
+        self._stopped.clear()
         self.ws = websocket.create_connection(self.websocket_url)
-        self.is_stop = False
-
         self.recv_th = threading.Thread(target=self._recv_loop, daemon=True)
         self.handle_event_th = threading.Thread(target=self._handle_event_loop, daemon=True)
         self.recv_th.start()
         self.handle_event_th.start()
 
     def stop(self):
-        self.is_stop = True
+        if self._stopped.is_set():
+            raise ChromeRuntimeException("Tab has been stopped")
+
+        self._stopped.set()
         self.ws.close()
 
     def wait(self, timeout=None):
-        # TODO
-        self.recv_th.join(timeout)
-        self.handle_event_th.join(timeout)
+        self._stopped.wait(timeout)
 
     def __str__(self):
         return "<Tab [%s] %s>" % (self.id, self.url)
