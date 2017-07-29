@@ -62,7 +62,7 @@ class Tab(object):
 
     def _send(self, message):
         if self._stopped.is_set():
-            raise ChromeRuntimeException("Tab is not started")
+            raise RuntimeException("Tab is not started")
 
         timeout = message.pop('_timeout', None)
 
@@ -79,7 +79,7 @@ class Tab(object):
         try:
             return self.method_results[message['id']].get(timeout=timeout)
         except queue.Empty:
-            raise ChromeTimeoutException("Send command %s timeout" % message['method'])
+            raise TimeoutException("Send command %s timeout" % message['method'])
         finally:
             self.method_results.pop(message['id'])
 
@@ -124,12 +124,12 @@ class Tab(object):
 
     def call_method(self, _method, *args, **kwargs):
         if args:
-            raise ChromeCallMethodException("the params should be key=value format")
+            raise CallMethodException("the params should be key=value format")
 
         result = self._send({"method": _method, "params": kwargs})
         if 'result' not in result and 'error' in result:
             logger.error("[-] %s error: %s" % (_method, result['error']['message']))
-            raise ChromeCallMethodException("calling method: %s error: %s" % (_method, result['error']['message']))
+            raise CallMethodException("calling method: %s error: %s" % (_method, result['error']['message']))
 
         return result['result']
 
@@ -138,7 +138,7 @@ class Tab(object):
             return self.event_handlers.pop(event, None)
 
         if not callable(callback):
-            raise ChromeRuntimeException("callback should be callable")
+            raise RuntimeException("callback should be callable")
 
         self.event_handlers[event] = callback
         return True
@@ -152,10 +152,10 @@ class Tab(object):
 
     def start(self):
         if not self.websocket_url:
-            raise ChromeRuntimeException("Has another client connect to this tab")
+            raise RuntimeException("Has another client connect to this tab")
 
         if not self._stopped.is_set():
-            raise ChromeRuntimeException("Tab has been started")
+            raise RuntimeException("Tab has been started")
 
         self._stopped.clear()
         self.ws = websocket.create_connection(self.websocket_url)
@@ -166,7 +166,7 @@ class Tab(object):
 
     def stop(self):
         if self._stopped.is_set():
-            raise ChromeRuntimeException("Tab has been stopped")
+            raise RuntimeException("Tab has been stopped")
 
         self._stopped.set()
         self.ws.close()

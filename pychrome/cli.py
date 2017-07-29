@@ -27,45 +27,45 @@ def main():
 @click.option("--web-socket", "-w", help="interpret <target> as a WebSocket URL instead of a target id")
 def inspect():
     """inspect a target (defaults to the first available target)"""
-    chrome = pychrome.Chrome()
+    browser = pychrome.Browser()
 
 
 @main.command()
 def list():
     """list all the available targets/tabs"""
-    chrome = pychrome.Chrome()
-    print(chrome.list_tab())
+    browser = pychrome.Browser()
+    print(browser.list_tab())
 
 
 @main.command()
 @click.argument("url", default=None)
 def new(url):
     """create a new target/tab"""
-    chrome = pychrome.Chrome()
-    print(chrome.new_tab(url))
+    browser = pychrome.Browser()
+    print(browser.new_tab(url))
 
 
 @main.command()
 @click.argument("id")
 def activate(id):
     """activate a target/tab by id"""
-    chrome = pychrome.Chrome()
-    print(chrome.activate_tab(id))
+    browser = pychrome.Browser()
+    print(browser.activate_tab(id))
 
 
 @main.command()
 @click.argument("id")
 def close(id):
     """close a target/tab by id"""
-    chrome = pychrome.Chrome()
-    print(chrome.close_tab(id))
+    browser = pychrome.Browser()
+    print(browser.close_tab(id))
 
 
 @main.command()
 def version():
     """show the browser version"""
-    chrome = pychrome.Chrome()
-    print(chrome.version())
+    browser = pychrome.Browser()
+    print(browser.version())
 
 
 if __name__ == '__main__':

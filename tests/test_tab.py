@@ -40,7 +40,7 @@ def test_invalid_method():
     try:
         tab.Page.NotExistMethod()
         assert 0, "should not run to this"
-    except pychrome.BrowserCallMethodException as e:
+    except pychrome.CallMethodException as e:
         pass
 
 
@@ -52,24 +52,24 @@ def test_invalid_params():
     try:
         tab.Page.navigate()
         assert 0, "should not run to this"
-    except pychrome.BrowserCallMethodException as e:
+    except pychrome.CallMethodException as e:
         pass
 
     try:
         tab.Page.navigate("http://fatezero.org")
         assert 0, "should not run to this"
-    except pychrome.BrowserCallMethodException as e:
+    except pychrome.CallMethodException as e:
         pass
 
     try:
         tab.Page.navigate(invalid_params="http://fatezero.org")
         assert 0, "should not run to this"
-    except pychrome.BrowserCallMethodException as e:
+    except pychrome.CallMethodException as e:
         pass
 
     try:
         tab.Page.navigate(url="http://fatezero.org", invalid_params=123)
-    except pychrome.BrowserCallMethodException as e:
+    except pychrome.CallMethodException as e:
         assert 0, "should not run to this"
 
 

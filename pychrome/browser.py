@@ -49,10 +49,16 @@ class Browser(object):
         return list(self.tabs.values())
 
     def activate_tab(self, tab_id):
+        if isinstance(tab_id, Tab):
+            tab_id = tab_id.id
+
         rp = requests.get("%s/json/activate/%s" % (self.dev_url, tab_id))
         return rp.text
 
     def close_tab(self, tab_id):
+        if isinstance(tab_id, Tab):
+            tab_id = tab_id.id
+
         rp = requests.get("%s/json/close/%s" % (self.dev_url, tab_id))
         self.tabs.pop(tab_id, None)
         return rp.text

@@ -4,17 +4,23 @@
 from __future__ import unicode_literals
 
 
-class ChromeTabConnectionException(Exception):
+class PyChromeException(Exception):
     pass
 
 
-class ChromeCallMethodException(Exception):
+class TabConnectionException(PyChromeException):
     pass
 
 
-class ChromeTimeoutException(Exception):
+class CallMethodException(PyChromeException):
     pass
 
 
-class ChromeRuntimeException(Exception):
+class TimeoutException(PyChromeException):
     pass
+
+
+class RuntimeException(PyChromeException):
+    pass
+
+

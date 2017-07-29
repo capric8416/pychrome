@@ -24,18 +24,18 @@ $ sudo python setup.py install
 
 ## Getting Started
 
-
 ``` python
 # 1. create a browser instance
-browser = pychrome.chrome(url="http://127.0.0.1:9222")
+browser = pychrome.Browser(url="http://127.0.0.1:9222")
 
 # 2. list all tabs (default has a blank tab)
-tabs = browser.list_tabs()
+tabs = browser.list_tab()
 
 if not tabs:
     tab = browser.new_tab()
 else:
     tab = tabs[0]
+
 
 # 3. register callback if you want
 def request_will_be_sent(**kwargs):
@@ -48,17 +48,27 @@ tab.start()
 
 # 5. call methods
 tab.Network.enable()
-tab.Page.navigate(url="http://github.com/fate0/pychrome")
+tab.Page.navigate(url="https://github.com/fate0/pychrome")
 
-# 5. wait for loading
+# 6. wait for loading
 tab.wait(5)
 
-# 6. close tab
-tab.close()
+# 7. stop tab (stop handle events and stop recv message from chrome)
+tab.stop()
+
+# 8. close tab
+browser.close_tab(tab)
 
 ```
 
 
-inspire by [chrome-remote-interface](https://github.com/cyrus-and/chrome-remote-interface/)
+## Examples
 
-https://chromedevtools.github.io/devtools-protocol/tot/
+
+
+
+
+## Ref
+
+* [chrome-remote-interface](https://github.com/cyrus-and/chrome-remote-interface/)
+* [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/tot/)
