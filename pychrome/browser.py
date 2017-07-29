@@ -14,14 +14,14 @@ except ImportError:
     import queue
 
 
-__all__ = ["Chrome"]
+__all__ = ["Browser"]
 
 
 logger = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.DEBUG)
 
 
-class Chrome(object):
+class Browser(object):
     def __init__(self, url="http://127.0.0.1:9222"):
         self.dev_url = url
         self.tabs = {}
@@ -65,6 +65,6 @@ class Chrome(object):
         pass
 
     def __str__(self):
-        return '<Chrome %s>' % self.dev_url
+        return '<Browser %s>' % self.dev_url
 
     __repr__ = __str__

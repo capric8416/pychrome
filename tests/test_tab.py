@@ -13,12 +13,12 @@ def close_all_tabs(chrome):
 
 
 def setup_function(function):
-    chrome = pychrome.Chrome()
+    chrome = pychrome.Browser()
     close_all_tabs(chrome)
 
 
 def test_normal_callmethod():
-    chrome = pychrome.Chrome()
+    chrome = pychrome.Browser()
     tab = chrome.new_tab()
 
     tab.start()
@@ -33,43 +33,43 @@ def test_normal_callmethod():
 
 
 def test_invalid_method():
-    chrome = pychrome.Chrome()
+    chrome = pychrome.Browser()
     tab = chrome.new_tab()
 
     tab.start()
     try:
         tab.Page.NotExistMethod()
         assert 0, "should not run to this"
-    except pychrome.ChromeCallMethodException as e:
+    except pychrome.BrowserCallMethodException as e:
         pass
 
 
 def test_invalid_params():
-    chrome = pychrome.Chrome()
+    chrome = pychrome.Browser()
     tab = chrome.new_tab()
 
     tab.start()
     try:
         tab.Page.navigate()
         assert 0, "should not run to this"
-    except pychrome.ChromeCallMethodException as e:
+    except pychrome.BrowserCallMethodException as e:
         pass
 
     try:
         tab.Page.navigate("http://fatezero.org")
         assert 0, "should not run to this"
-    except pychrome.ChromeCallMethodException as e:
+    except pychrome.BrowserCallMethodException as e:
         pass
 
     try:
         tab.Page.navigate(invalid_params="http://fatezero.org")
         assert 0, "should not run to this"
-    except pychrome.ChromeCallMethodException as e:
+    except pychrome.BrowserCallMethodException as e:
         pass
 
     try:
         tab.Page.navigate(url="http://fatezero.org", invalid_params=123)
-    except pychrome.ChromeCallMethodException as e:
+    except pychrome.BrowserCallMethodException as e:
         assert 0, "should not run to this"
 
 
