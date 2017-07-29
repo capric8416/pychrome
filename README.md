@@ -13,10 +13,16 @@ The Python interface to drive Chrome
 To install pychrome, simply:
 
 ```
+$ pip install -U git+https://github.com/fate0/pychrome.git
+```
+
+or from pypi:
+
+```
 $ pip install -U pychrome
 ```
 
-of from source:
+or from source:
 
 ```
 $ python setup.py install

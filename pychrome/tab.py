@@ -52,6 +52,8 @@ class Tab(object):
         self.websocket_url = kwargs.get("webSocketDebuggerUrl")
         self.desc = kwargs.get("description")
 
+        self.origin_json = kwargs
+
         self.cur_id = 1000
         self.event_handlers = {}
         self.method_results = {}
