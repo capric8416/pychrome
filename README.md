@@ -13,13 +13,13 @@ The Python interface to drive Chrome
 To install pychrome, simply:
 
 ```
-$ sudo pip install -U pychrome
+$ pip install -U pychrome
 ```
 
 of from source:
 
 ```
-$ sudo python setup.py install
+$ python setup.py install
 ```
 
 ## Getting Started

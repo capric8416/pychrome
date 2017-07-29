@@ -67,9 +67,6 @@ class Browser(object):
         rp = requests.get("%s/json/version" % self.dev_url, json=True)
         return rp.json()
 
-    def inspect_tab(self, tab_id):
-        pass
-
     def __str__(self):
         return '<Browser %s>' % self.dev_url
 

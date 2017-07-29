@@ -24,13 +24,6 @@ def main():
 
 
 @main.command()
-@click.option("--web-socket", "-w", help="interpret <target> as a WebSocket URL instead of a target id")
-def inspect():
-    """inspect a target (defaults to the first available target)"""
-    browser = pychrome.Browser()
-
-
-@main.command()
 def list():
     """list all the available targets/tabs"""
     browser = pychrome.Browser()
