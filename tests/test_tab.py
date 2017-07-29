@@ -22,7 +22,54 @@ def test_xxx():
     tab = chrome.new_tab()
 
     tab.start()
-    tab.Page.navigate(url="http://httpbin.org/post")
-    tab.wait(1)
+    result = tab.Page.navigate(url="http://www.fatezero.org")
+    assert result['frameId']
 
-    assert 1 == 0
+    result = tab.Runtime.evaluate(expression="document.domain")
+
+    assert result['result']['type'] == 'string'
+    assert result['result']['value'] == 'www.fatezero.org'
+
+
+def test_invalid_method():
+    chrome = pychrome.Chrome()
+    tab = chrome.new_tab()
+
+    tab.start()
+    try:
+        tab.Page.NotExistMethod()
+        assert 0, "should not run to this"
+    except pychrome.ChromeCallMethodException as e:
+        pass
+
+
+def test_invalid_params():
+    chrome = pychrome.Chrome()
+    tab = chrome.new_tab()
+
+    tab.start()
+    try:
+        tab.Page.navigate()
+        assert 0, "should not run to this"
+    except pychrome.ChromeCallMethodException as e:
+        pass
+
+    try:
+        tab.Page.navigate("http://fatezero.org")
+        assert 0, "should not run to this"
+    except pychrome.ChromeCallMethodException as e:
+        pass
+
+    try:
+        tab.Page.navigate(invalid_params="http://fatezero.org")
+        assert 0, "should not run to this"
+    except pychrome.ChromeCallMethodException as e:
+        pass
+
+    try:
+        tab.Page.navigate(url="http://fatezero.org", invalid_params=123)
+    except pychrome.ChromeCallMethodException as e:
+        assert 0, "should not run to this"
+
+
+

@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import json
 import logging
 import functools
 import threading
@@ -14,11 +15,6 @@ try:
     import Queue as queue
 except ImportError:
     import queue
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
 
 
 logger = logging.getLogger(__name__)
@@ -42,7 +38,7 @@ class GenericAttr(object):
         self.__dict__['tab'] = tab
 
     def __getattr__(self, item):
-        return functools.partial(self.tab.call_method, _method="%s.%s" % (self.name, item))
+        return functools.partial(self.tab.call_method, "%s.%s" % (self.name, item))
 
     def __setattr__(self, key, value):
         self.tab.event_handlers["%s.%s" % (self.name, key)] = value
@@ -129,7 +125,10 @@ class Tab(object):
         setattr(self, item, attr)
         return attr
 
-    def call_method(self, _method, **kwargs):
+    def call_method(self, _method, *args, **kwargs):
+        if args:
+            raise ChromeCallMethodException("the params should be key=value format")
+
         result = self._send({"method": _method, "params": kwargs})
         if 'result' not in result and 'error' in result:
             logger.error("[-] %s error: %s" % (_method, result['error']['message']))
@@ -141,7 +140,13 @@ class Tab(object):
         if not callback:
             return self.event_handlers.pop(event, None)
 
+        assert callable(callback), "callback should be callable"
+
         self.event_handlers[event] = callback
+        return True
+
+    def del_all_listeners(self):
+        self.event_handlers = {}
         return True
 
     def start(self):
