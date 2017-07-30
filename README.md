@@ -67,6 +67,12 @@ browser.close_tab(tab)
 
 ```
 
+or
+
+``` python
+
+```
+
 
 ## Examples
 

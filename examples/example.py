@@ -39,10 +39,28 @@ tab.stop()
 browser.close_tab(tab)
 
 
+
+
+# 1. create a browser instance
+browser = pychrome.Browser(url="http://127.0.0.1:9222")
+
+# 2. list all tabs (default has a blank tab)
+tabs = browser.list_tab()
+
+if not tabs:
+    tab = browser.new_tab()
+else:
+    tab = tabs[0]
+
+
+# 3. register callback if you want
+def request_will_be_sent(**kwargs):
+    print("loading: %s" % kwargs.get('request').get('url'))
+
+
 tab.set_listener("Network.requestWillBeSent", request_will_be_sent)
 
 tab.call_method("Page.navigate", url="https://github.com/fate0/pychrome")
 
 tab.set_listener("Network.requestWillBeSent", request_will_be_sent)
-tab.set_listener("Network.requestWillBeSent", None)
-tab.get_listener("Network.requestWillBeSent")
+

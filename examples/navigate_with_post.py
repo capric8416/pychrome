@@ -43,14 +43,14 @@ class EventHandler(object):
 
 
 def main():
-    chrome = pychrome.Chrome()
+    browser = pychrome.Browser()
 
     tabs = []
     for i in range(4):
-        tabs.append(chrome.new_tab())
+        tabs.append(browser.new_tab())
 
     for i, tab in enumerate(tabs):
-        eh = EventHandler(chrome, tab)
+        eh = EventHandler(browser, tab)
         tab.Network.requestIntercepted = eh.request_intercepted
         tab.Page.frameStartedLoading = eh.frame_started_loading
         tab.Page.frameStoppedLoading = eh.frame_stopped_loading
@@ -63,7 +63,7 @@ def main():
 
     for tab in tabs:
         tab.wait(60)
-        chrome.close_tab(tab.id)
+        browser.close_tab(tab.id)
 
     print('Done')
 

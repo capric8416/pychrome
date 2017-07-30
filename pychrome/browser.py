@@ -22,9 +22,15 @@ logger = logging.getLogger(__name__)
 
 
 class Browser(object):
+    all_tabs = {}
+
     def __init__(self, url="http://127.0.0.1:9222"):
         self.dev_url = url
-        self.tabs = {}
+
+        if self.dev_url not in self.all_tabs:
+            self.tabs = self.all_tabs[self.dev_url] = {}
+        else:
+            self.tabs = self.all_tabs[self.dev_url]
 
     def new_tab(self, url=None):
         url = url or ''

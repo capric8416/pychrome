@@ -31,13 +31,13 @@ class GenericAttr(object):
         self.__dict__['tab'] = tab
 
     def __getattr__(self, item):
-        full_method_name = "%s.%s" % (self.name, item)
-        event_listener = self.tab.get_listener(full_method_name)
+        method_name = "%s.%s" % (self.name, item)
+        event_listener = self.tab.get_listener(method_name)
 
         if event_listener:
             return event_listener
 
-        return functools.partial(self.tab.call_method, full_method_name)
+        return functools.partial(self.tab.call_method, method_name)
 
     def __setattr__(self, key, value):
         self.tab.set_listener("%s.%s" % (self.name, key), value)
@@ -98,7 +98,7 @@ class Tab(object):
                 message = json.loads(self.ws.recv())
             except websocket.WebSocketTimeoutException:
                 continue
-            except websocket.WebSocketConnectionClosedException:
+            except (websocket.WebSocketConnectionClosedException, OSError):
                 return
 
             if "method" in message:
