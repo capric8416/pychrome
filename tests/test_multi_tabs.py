@@ -67,10 +67,10 @@ def test_set_event_listener():
         tab.Network.requestWillBeSent = functools.partial(request_will_be_sent, tab)
         tab.start()
         tab.Network.enable()
-        tab.Page.navigate(url="chrome://newtab/")
+        tab.Page.navigate(url="chrome://newtab/", _timeout=5)
 
     for tab in tabs:
-        if not tab.wait():
+        if not tab.wait(timeout=5):
             assert False, "never get here"
 
 
@@ -88,7 +88,7 @@ def test_reuse_tab():
         tab.Page.navigate(url="chrome://newtab/")
 
     for tab in tabs:
-        if not tab.wait():
+        if not tab.wait(timeout=5):
             assert False, "never get here"
 
     for tab in tabs:
@@ -97,6 +97,6 @@ def test_reuse_tab():
         tab.Page.navigate(url="http://www.fatezero.org/")
 
     for tab in tabs:
-        if not tab.wait():
+        if not tab.wait(timeout=5):
             assert False, "never get here"
 

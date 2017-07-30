@@ -45,10 +45,10 @@ $ google-chrome --headless --disable-gpu --remote-debugging-port=9222
 ## Getting Started
 
 ``` python
-# 1. create a browser instance
+# create a browser instance
 browser = pychrome.Browser(url="http://127.0.0.1:9222")
 
-# 2. list all tabs (default has a blank tab)
+# list all tabs (default has a blank tab)
 tabs = browser.list_tab()
 
 if not tabs:
@@ -57,18 +57,19 @@ else:
     tab = tabs[0]
 
 
-# 3. register callback if you want
+# register callback if you want
 def request_will_be_sent(**kwargs):
     print("loading: %s" % kwargs.get('request').get('url'))
 
 tab.Network.requestWillBeSent = request_will_be_sent
 
-# 4. start handle events and ready to call method
+# start handle events and ready to call method
 tab.start()
 
-# 5. call methods
+# call method
 tab.Network.enable()
-tab.Page.navigate(url="https://github.com/fate0/pychrome")
+# call method with timeout
+tab.Page.navigate(url="https://github.com/fate0/pychrome", _timeout=5)
 
 # 6. wait for loading
 tab.wait(5)
@@ -101,7 +102,7 @@ tab.set_listener("Network.requestWillBeSent", request_will_be_sent)
 
 tab.start()
 tab.call_method("Network.enable")
-tab.call_method("Page.navigate", url="https://github.com/fate0/pychrome")
+tab.call_method("Page.navigate", url="https://github.com/fate0/pychrome", _timeout=5)
 
 tab.wait(5)
 tab.stop()
