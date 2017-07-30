@@ -16,6 +16,6 @@ env:
 
 install:
   - pip install -U tox
-  - pip install -U requirements_dev.txt
+  - pip install -r requirements_dev.txt
 
 script: tox -e ${TOXENV}
