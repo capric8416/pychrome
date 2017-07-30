@@ -1,6 +1,10 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+require chrome version > 61
+"""
+
 
 import time
 import pychrome

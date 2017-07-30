@@ -28,6 +28,20 @@ or from source:
 $ python setup.py install
 ```
 
+## Setup Chrome
+
+simply:
+
+```
+$ google-chrome --remote-debugging-port=9222
+```
+
+or headless mode (chrome version >= 59)
+
+```
+$ google-chrome --headless --disable-gpu --remote-debugging-port=9222
+```
+
 ## Getting Started
 
 ``` python
@@ -95,11 +109,13 @@ tab.stop()
 browser.close_tab(tab)
 ```
 
+more methods or events could be found in
+[Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/tot/)
+
 
 ## Examples
 
-
-
+please see the [examples](http://github.com/fate0/pychrome/blob/master/examples) directory for some more examples
 
 
 ## Ref
