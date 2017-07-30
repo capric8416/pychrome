@@ -7,13 +7,14 @@ with open('README.md') as readme_file:
     readme = readme_file.read()
 
 requirements = [
+    'click>=6.0',
     'websocket-client>=0.44.0',
     'requests>=2.13.0',
 ]
 
 setup(
     name='pychrome',
-    version='0.0.1',
+    version='0.1.0',
     description="A Python Package for the Google Chrome Dev Protocol",
     long_description=readme,
     author="fate0",
