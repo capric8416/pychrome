@@ -5,22 +5,22 @@ import time
 import base64
 import pychrome
 
-import gevent.lock
+import threading
 
 
 urls = [
     "http://fatezero.org",
     "http://blog.fatezero.org",
     "http://github.com/fate0",
-    "https://www.zhihu.com/people/fatez3r0",
+    "http://github.com/fate0/pychrome"
 ]
 
 
 class EventHandler(object):
-    pdf_lock = gevent.lock.RLock()
+    pdf_lock = threading.Lock()
 
-    def __init__(self, chrome, tab):
-        self.chrome = chrome
+    def __init__(self, browser, tab):
+        self.browser = browser
         self.tab = tab
         self.start_frame = None
 
@@ -34,7 +34,7 @@ class EventHandler(object):
 
             with self.pdf_lock:
                 # must activate current tab
-                print(self.chrome.activate_tab(self.tab.id))
+                print(self.browser.activate_tab(self.tab.id))
 
                 try:
                     data = self.tab.Page.printToPDF()
@@ -45,15 +45,33 @@ class EventHandler(object):
                     self.tab.stop()
 
 
+def close_all_tabs(browser):
+    if len(browser.list_tab()) == 0:
+        return
+
+    for tab in browser.list_tab():
+        try:
+            tab.stop()
+        except pychrome.RuntimeException:
+            pass
+
+        browser.close_tab(tab)
+
+    time.sleep(1)
+    assert len(browser.list_tab()) == 0
+
+
 def main():
-    chrome = pychrome.Chrome()
+    browser = pychrome.Browser()
+
+    close_all_tabs(browser)
 
     tabs = []
     for i in range(len(urls)):
-        tabs.append(chrome.new_tab())
+        tabs.append(browser.new_tab())
 
     for i, tab in enumerate(tabs):
-        eh = EventHandler(chrome, tab)
+        eh = EventHandler(browser, tab)
         tab.Page.frameStartedLoading = eh.frame_started_loading
         tab.Page.frameStoppedLoading = eh.frame_stopped_loading
 
@@ -64,7 +82,7 @@ def main():
 
     for tab in tabs:
         tab.wait(60)
-        chrome.close_tab(tab.id)
+        browser.close_tab(tab.id)
 
     print('Done')
 

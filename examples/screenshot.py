@@ -11,15 +11,15 @@ urls = [
     "http://fatezero.org",
     "http://blog.fatezero.org",
     "http://github.com/fate0",
-    "https://www.zhihu.com/people/fatez3r0",
+    "http://github.com/fate0/pychrome"
 ]
 
 
 class EventHandler(object):
-    screen_lock = threading.RLock()
+    screen_lock = threading.Lock()
 
-    def __init__(self, chrome, tab):
-        self.chrome = chrome
+    def __init__(self, browser, tab):
+        self.browser = browser
         self.tab = tab
         self.start_frame = None
 
@@ -33,7 +33,7 @@ class EventHandler(object):
 
             with self.screen_lock:
                 # must activate current tab
-                print(self.chrome.activate_tab(self.tab.id))
+                print(self.browser.activate_tab(self.tab.id))
 
                 try:
                     data = self.tab.Page.captureScreenshot()
@@ -43,8 +43,26 @@ class EventHandler(object):
                     self.tab.stop()
 
 
+def close_all_tabs(browser):
+    if len(browser.list_tab()) == 0:
+        return
+
+    for tab in browser.list_tab():
+        try:
+            tab.stop()
+        except pychrome.RuntimeException:
+            pass
+
+        browser.close_tab(tab)
+
+    time.sleep(1)
+    assert len(browser.list_tab()) == 0
+
+
 def main():
     browser = pychrome.Browser()
+
+    close_all_tabs(browser)
 
     tabs = []
     for i in range(len(urls)):

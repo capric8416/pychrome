@@ -7,8 +7,8 @@ import pychrome
 
 
 class EventHandler(object):
-    def __init__(self, chrome, tab):
-        self.chrome = chrome
+    def __init__(self, browser, tab):
+        self.browser = browser
         self.tab = tab
         self.start_frame = None
         self.is_first_request = True
@@ -42,8 +42,26 @@ class EventHandler(object):
             self.tab.stop()
 
 
+def close_all_tabs(browser):
+    if len(browser.list_tab()) == 0:
+        return
+
+    for tab in browser.list_tab():
+        try:
+            tab.stop()
+        except pychrome.RuntimeException:
+            pass
+
+        browser.close_tab(tab)
+
+    time.sleep(1)
+    assert len(browser.list_tab()) == 0
+
+
 def main():
     browser = pychrome.Browser()
+
+    close_all_tabs(browser)
 
     tabs = []
     for i in range(4):
@@ -63,7 +81,7 @@ def main():
 
     for tab in tabs:
         tab.wait(60)
-        browser.close_tab(tab.id)
+        browser.close_tab(tab)
 
     print('Done')
 

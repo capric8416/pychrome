@@ -22,7 +22,6 @@ __all__ = ["Tab"]
 
 
 logger = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.DEBUG)
 
 
 class GenericAttr(object):

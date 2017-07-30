@@ -32,7 +32,7 @@ def teardown_function(function):
 
 def test_chome_version():
     browser = pychrome.Browser()
-    chrome_version = browser.version()
+    browser_version = browser.version()
 
 
 def test_browser_list():

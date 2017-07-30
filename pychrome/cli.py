@@ -13,8 +13,8 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 shared_options = [
     click.option("--version", "-v", help="output usage information"),
-    click.option("--host", "-t", type=click.STRING, help="HTTP frontend host"),
-    click.option("--port", "-p", type=click.INT, help="HTTP frontend port"),
+    click.option("--host", "-t", type=click.STRING, default='127.0.0.1', help="HTTP frontend host"),
+    click.option("--port", "-p", type=click.INT, default=9222, help="HTTP frontend port"),
     click.option("--secure", "-s", help="HTTPS/WSS frontend")
 ]
 

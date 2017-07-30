@@ -18,7 +18,6 @@ __all__ = ["Browser"]
 
 
 logger = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.DEBUG)
 
 
 class Browser(object):
