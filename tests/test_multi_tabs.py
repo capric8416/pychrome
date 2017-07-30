@@ -85,7 +85,7 @@ def test_reuse_tab():
         tab.Network.requestWillBeSent = functools.partial(request_will_be_sent, tab)
         tab.start()
         tab.Network.enable()
-        tab.Page.navigate(url="chrome://newtab/")
+        tab.Page.navigate(url="chrome://newtab/", _timeout=5)
 
     for tab in tabs:
         if not tab.wait(timeout=5):
@@ -94,7 +94,7 @@ def test_reuse_tab():
     for tab in tabs:
         tab.start()
         tab.Network.enable()
-        tab.Page.navigate(url="http://www.fatezero.org/")
+        tab.Page.navigate(url="http://www.fatezero.org/", _timeout=5)
 
     for tab in tabs:
         if not tab.wait(timeout=5):
