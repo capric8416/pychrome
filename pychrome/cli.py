@@ -12,10 +12,9 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
 shared_options = [
-    click.option("--version", "-v", help="output usage information"),
     click.option("--host", "-t", type=click.STRING, default='127.0.0.1', help="HTTP frontend host"),
     click.option("--port", "-p", type=click.INT, default=9222, help="HTTP frontend port"),
-    click.option("--secure", "-s", help="HTTPS/WSS frontend")
+    click.option("--secure", "-s", is_flag=True, help="HTTPS/WSS frontend")
 ]
 
 
@@ -42,45 +41,69 @@ def main():
 
 @main.command(context_settings=CONTEXT_SETTINGS)
 @add_shared_options
-def list():
+def list(host, port, secure):
     """list all the available targets/tabs"""
-    browser = pychrome.Browser()
-    print(json.dumps(browser.list_tab(), cls=JSONTabEncoder, indent=4))
+    url = "%s://%s:%s" % ("https" if secure else "http", host, port)
+    try:
+        browser = pychrome.Browser(url)
+        click.echo(json.dumps(browser.list_tab(), cls=JSONTabEncoder, indent=4))
+    except Exception as e:
+        click.echo(e)
 
 
 @main.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("url", required=False)
 @add_shared_options
-def new(url="about:blank"):
+def new(host, port, secure, url="about:blank"):
     """create a new target/tab"""
-    browser = pychrome.Browser()
-    print(json.dumps(browser.new_tab(url), cls=JSONTabEncoder, indent=4))
+    _url = "%s://%s:%s" % ("https" if secure else "http", host, port)
+
+    try:
+        browser = pychrome.Browser(_url)
+        click.echo(json.dumps(browser.new_tab(url), cls=JSONTabEncoder, indent=4))
+    except Exception as e:
+        click.echo(e)
 
 
 @main.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("id")
 @add_shared_options
-def activate(id):
+def activate(host, port, secure, id):
     """activate a target/tab by id"""
-    browser = pychrome.Browser()
-    print(browser.activate_tab(id))
+    url = "%s://%s:%s" % ("https" if secure else "http", host, port)
+
+    try:
+        browser = pychrome.Browser(url)
+        click.echo(browser.activate_tab(id))
+    except Exception as e:
+        click.echo(e)
 
 
 @main.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("id")
 @add_shared_options
-def close(id):
+def close(host, port, secure, id):
     """close a target/tab by id"""
-    browser = pychrome.Browser()
-    print(browser.close_tab(id))
+    url = "%s://%s:%s" % ("https" if secure else "http", host, port)
+
+    try:
+        browser = pychrome.Browser(url)
+        click.echo(browser.close_tab(id))
+    except Exception as e:
+        click.echo(e)
 
 
 @main.command(context_settings=CONTEXT_SETTINGS)
 @add_shared_options
-def version():
+def version(host, port, secure):
     """show the browser version"""
-    browser = pychrome.Browser()
-    print(json.dumps(browser.version(), indent=4))
+    url = "%s://%s:%s" % ("https" if secure else "http", host, port)
+
+    try:
+        browser = pychrome.Browser(url)
+        click.echo(json.dumps(browser.version(), indent=4))
+    except Exception as e:
+        click.echo(e)
 
 
 if __name__ == '__main__':

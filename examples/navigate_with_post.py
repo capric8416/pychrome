@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-require chrome version > 61
+require chrome version >= 61.0.3119.0
 """
 
 
