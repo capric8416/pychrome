@@ -113,10 +113,31 @@ browser.close_tab(tab)
 more methods or events could be found in
 [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/tot/)
 
+## Tab management
+
+run `pychrome -h` for more info
+
+example:
+```
+$ pychrome new http://www.fatezero.org
+{
+    "description": "",
+    "url": "http://www.fatezero.org/",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/557d8315-e909-466c-bf20-f5a6133ebd89",
+    "id": "557d8315-e909-466c-bf20-f5a6133ebd89",
+    "type": "page",
+    "devtoolsFrontendUrl": "/devtools/inspector.html?ws=127.0.0.1:9222/devtools/page/557d8315-e909-466c-bf20-f5a6133ebd89",
+    "title": ""
+}
+
+$ pychrome close 557d8315-e909-466c-bf20-f5a6133ebd89
+Target is closing
+```
+
 
 ## Examples
 
-please see the [examples](http://github.com/fate0/pychrome/blob/master/examples) directory for some more examples
+please see the [examples](http://github.com/fate0/pychrome/blob/master/examples) directory for more examples
 
 
 ## Ref
