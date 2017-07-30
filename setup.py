@@ -9,19 +9,23 @@ with open('README.md') as readme_file:
 requirements = [
     'websocket-client>=0.44.0',
     'requests>=2.13.0',
-    'gevent>=1.2.1',
 ]
 
 setup(
     name='pychrome',
     version='0.0.1',
-    description="pychrome",
+    description="A Python Package for the Google Chrome Dev Protocol",
     long_description=readme,
     author="fate0",
     author_email='fate0@fatezero.org',
     url='https://github.com/fate0/pychrome',
     packages=find_packages(),
     package_dir={},
+    entry_points={
+        'console_scripts': [
+            'pychrome=pychrome.cli:main'
+        ]
+    },
     include_package_data=True,
     install_requires=requirements,
     license="BSD license",

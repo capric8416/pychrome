@@ -5,7 +5,7 @@
 [![PyPI](https://img.shields.io/pypi/v/pychrome.svg)](https://pypi.python.org/pypi/pychrome)
 [![PyPI](https://img.shields.io/pypi/pyversions/pychrome.svg)](https://pypi.python.org/pypi/pychrome)
 
-The Python interface to drive Chrome
+A Python Package for the Google Chrome Dev Protocol
 
 
 ## Installation

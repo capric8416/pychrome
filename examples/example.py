@@ -37,3 +37,12 @@ tab.stop()
 
 # 8. close tab
 browser.close_tab(tab)
+
+
+tab.set_listener("Network.requestWillBeSent", request_will_be_sent)
+
+tab.call_method("Page.navigate", url="https://github.com/fate0/pychrome")
+
+tab.set_listener("Network.requestWillBeSent", request_will_be_sent)
+tab.set_listener("Network.requestWillBeSent", None)
+tab.get_listener("Network.requestWillBeSent")

@@ -19,8 +19,7 @@ shared_options = [
 ]
 
 
-def pass_cli_config(func):
-    # add all the shared options to the command
+def add_shared_options(func):
     for option in shared_options:
         func = option(func)
 
@@ -42,7 +41,7 @@ def main():
 
 
 @main.command(context_settings=CONTEXT_SETTINGS)
-@pass_cli_config
+@add_shared_options
 def list():
     """list all the available targets/tabs"""
     browser = pychrome.Browser()
@@ -51,7 +50,7 @@ def list():
 
 @main.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("url", required=False)
-@pass_cli_config
+@add_shared_options
 def new(url="about:blank"):
     """create a new target/tab"""
     browser = pychrome.Browser()
@@ -60,7 +59,7 @@ def new(url="about:blank"):
 
 @main.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("id")
-@pass_cli_config
+@add_shared_options
 def activate(id):
     """activate a target/tab by id"""
     browser = pychrome.Browser()
@@ -69,7 +68,7 @@ def activate(id):
 
 @main.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("id")
-@pass_cli_config
+@add_shared_options
 def close(id):
     """close a target/tab by id"""
     browser = pychrome.Browser()
@@ -77,7 +76,7 @@ def close(id):
 
 
 @main.command(context_settings=CONTEXT_SETTINGS)
-@pass_cli_config
+@add_shared_options
 def version():
     """show the browser version"""
     browser = pychrome.Browser()

@@ -113,6 +113,10 @@ def test_get_event_listener():
         assert False, "never get here"
 
     assert tab.Network.requestWillBeSent == request_will_be_sent
+    tab.Network.requestWillBeSent = None
+
+    assert not tab.get_listener("Network.requestWillBeSent")
+    assert tab.Network.requestWillBeSent != tab.get_listener("Network.requestWillBeSent")
 
 
 def test_reuse_tab():
@@ -164,4 +168,25 @@ def test_del_event_listener():
 
 
 def test_del_all_event_listener():
-    pass
+    browser = pychrome.Browser()
+    tab = browser.new_tab()
+
+    def request_will_be_sent(**kwargs):
+        tab.stop()
+
+    tab.Network.requestWillBeSent = request_will_be_sent
+    tab.start()
+    tab.Network.enable()
+    tab.Page.navigate(url="chrome://newtab/")
+
+    if not tab.wait():
+        assert False, "never get here"
+
+    # delete all listener
+    tab.del_all_listeners()
+    tab.start()
+    tab.Network.enable()
+    tab.Page.navigate(url="http://www.fatezero.org")
+
+    if tab.wait(timeout=5):
+        assert False, "never get here"
