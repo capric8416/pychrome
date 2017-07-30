@@ -1,12 +1,11 @@
-dist: trusty
+language: python
+python: 3.5
+
 addons:
   chrome: beta
 before_install:
   - # start your web application and listen on `localhost`
   - google-chrome-beta --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
-
-language: python
-python: 3.5
 
 env:
   - TOXENV=py35

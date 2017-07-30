@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import time
+import logging
 import pychrome
 import functools
+
+
+logging.basicConfig(level=logging.DEBUG)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 
 def close_all_tabs(browser):
