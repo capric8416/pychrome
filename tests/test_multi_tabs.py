@@ -72,7 +72,10 @@ def test_set_event_listener():
         tab.Network.requestWillBeSent = functools.partial(request_will_be_sent, tab)
         tab.start()
         tab.Network.enable()
-        tab.Page.navigate(url="chrome://newtab/", _timeout=5)
+        try:
+            tab.Page.navigate(url="chrome://newtab/")
+        except pychrome.UserAbortException:
+            pass
 
     for tab in tabs:
         if not tab.wait(timeout=5):
@@ -90,7 +93,10 @@ def test_reuse_tab():
         tab.Network.requestWillBeSent = functools.partial(request_will_be_sent, tab)
         tab.start()
         tab.Network.enable()
-        tab.Page.navigate(url="chrome://newtab/", _timeout=5)
+        try:
+            tab.Page.navigate(url="chrome://newtab/")
+        except pychrome.UserAbortException:
+            pass
 
     for tab in tabs:
         if not tab.wait(timeout=5):
@@ -99,7 +105,7 @@ def test_reuse_tab():
     for tab in tabs:
         tab.start()
         tab.Network.enable()
-        tab.Page.navigate(url="http://www.fatezero.org/", _timeout=5)
+        tab.Page.navigate(url="http://www.fatezero.org/")
 
     for tab in tabs:
         if not tab.wait(timeout=5):

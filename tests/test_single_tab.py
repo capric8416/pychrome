@@ -38,7 +38,7 @@ def test_normal_callmethod():
     tab = browser.new_tab()
 
     tab.start()
-    result = tab.Page.navigate(url="http://www.fatezero.org", _timeout=5)
+    result = tab.Page.navigate(url="http://www.fatezero.org")
     assert result['frameId']
 
     time.sleep(1)
@@ -99,7 +99,10 @@ def test_set_event_listener():
     tab.Network.requestWillBeSent = request_will_be_sent
     tab.start()
     tab.Network.enable()
-    tab.Page.navigate(url="chrome://newtab/")
+    try:
+        tab.Page.navigate(url="chrome://newtab/")
+    except pychrome.UserAbortException:
+        pass
 
     if not tab.wait(timeout=5):
         assert False, "never get here"
@@ -115,7 +118,10 @@ def test_get_event_listener():
     tab.Network.requestWillBeSent = request_will_be_sent
     tab.start()
     tab.Network.enable()
-    tab.Page.navigate(url="chrome://newtab/")
+    try:
+        tab.Page.navigate(url="chrome://newtab/")
+    except pychrome.UserAbortException:
+        pass
 
     if not tab.wait(timeout=5):
         assert False, "never get here"
@@ -138,14 +144,17 @@ def test_reuse_tab():
     tab.Network.requestWillBeSent = request_will_be_sent
     tab.start()
     tab.Network.enable()
-    tab.Page.navigate(url="chrome://newtab/", _timeout=5)
+    try:
+        tab.Page.navigate(url="chrome://newtab/")
+    except pychrome.UserAbortException:
+        pass
 
     if not tab.wait(timeout=5):
         assert False, "never get here"
 
     tab.start()
     tab.Network.enable()
-    tab.Page.navigate(url="http://www.fatezero.org", _timeout=5)
+    tab.Page.navigate(url="http://www.fatezero.org")
 
     if not tab.wait(timeout=5):
         assert False, "never get here"
@@ -161,7 +170,10 @@ def test_del_event_listener():
     tab.Network.requestWillBeSent = request_will_be_sent
     tab.start()
     tab.Network.enable()
-    tab.Page.navigate(url="chrome://newtab/", _timeout=5)
+    try:
+        tab.Page.navigate(url="chrome://newtab/")
+    except pychrome.UserAbortException:
+        pass
 
     if not tab.wait(timeout=5):
         assert False, "never get here"
@@ -170,7 +182,10 @@ def test_del_event_listener():
     tab.Network.requestWillBeSent = None
     tab.start()
     tab.Network.enable()
-    tab.Page.navigate(url="http://www.fatezero.org", _timeout=5)
+    try:
+        tab.Page.navigate(url="http://www.fatezero.org")
+    except pychrome.UserAbortException:
+        pass
 
     if tab.wait(timeout=5):
         assert False, "never get here"
@@ -186,7 +201,10 @@ def test_del_all_event_listener():
     tab.Network.requestWillBeSent = request_will_be_sent
     tab.start()
     tab.Network.enable()
-    tab.Page.navigate(url="chrome://newtab/")
+    try:
+        tab.Page.navigate(url="chrome://newtab/")
+    except pychrome.UserAbortException:
+        pass
 
     if not tab.wait(timeout=5):
         assert False, "never get here"
@@ -195,7 +213,7 @@ def test_del_all_event_listener():
     tab.del_all_listeners()
     tab.start()
     tab.Network.enable()
-    tab.Page.navigate(url="http://www.fatezero.org", _timeout=5)
+    tab.Page.navigate(url="http://www.fatezero.org")
 
     if tab.wait(timeout=5):
         assert False, "never get here"
@@ -216,7 +234,10 @@ def test_use_callable_class_event_listener():
     tab.Network.requestWillBeSent = CallableClass(tab)
     tab.start()
     tab.Network.enable()
-    tab.Page.navigate(url="chrome://newtab/")
+    try:
+        tab.Page.navigate(url="chrome://newtab/")
+    except pychrome.UserAbortException:
+        pass
 
     if not tab.wait(timeout=5):
         assert False, "never get here"
@@ -225,7 +246,7 @@ def test_use_callable_class_event_listener():
     tab.del_all_listeners()
     tab.start()
     tab.Network.enable()
-    tab.Page.navigate(url="http://www.fatezero.org", _timeout=5)
+    tab.Page.navigate(url="http://www.fatezero.org")
 
     if tab.wait(timeout=5):
         assert False, "never get here"
