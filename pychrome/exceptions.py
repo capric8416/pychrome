@@ -8,6 +8,10 @@ class PyChromeException(Exception):
     pass
 
 
+class UserAbortException(PyChromeException):
+    pass
+
+
 class TabConnectionException(PyChromeException):
     pass
 

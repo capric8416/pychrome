@@ -81,10 +81,26 @@ class Tab(object):
         with self.ws_send_lock:
             self.ws.send(json.dumps(message))
 
+        if timeout > 1:
+            q_timeout = 1
+        else:
+            q_timeout = timeout / 2.0
+
         try:
-            return self.method_results[message['id']].get(timeout=timeout)
-        except queue.Empty:
-            raise TimeoutException("Send command %s timeout" % message['method'])
+            while not self._stopped.is_set():
+                try:
+                    if timeout < q_timeout:
+                        q_timeout = timeout
+
+                    timeout -= q_timeout
+                    return self.method_results[message['id']].get(timeout=q_timeout)
+                except queue.Empty:
+                    if timeout <= 0:
+                        raise TimeoutException("Send command %s timeout" % message['method'])
+
+                    continue
+
+            raise UserAbortException("user abort, call stop() when sending method")
         finally:
             self.method_results.pop(message['id'])
 
