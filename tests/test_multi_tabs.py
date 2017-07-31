@@ -14,6 +14,7 @@ def close_all_tabs(browser):
     if len(browser.list_tab()) == 0:
         return
 
+    logging.debug("[*] recycle")
     for tab in browser.list_tab():
         try:
             tab.stop()

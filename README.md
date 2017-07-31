@@ -46,10 +46,17 @@ simply:
 $ google-chrome --remote-debugging-port=9222
 ```
 
-or headless mode (chrome version >= 59)
+or headless mode (chrome version >= 59):
 
 ```
 $ google-chrome --headless --disable-gpu --remote-debugging-port=9222
+```
+
+or use docker:
+
+```
+$ docker pull fate0/headless-chrome
+$ docker run -it --rm --cap-add=SYS_ADMIN -p9222:9222 fate0/headless-chrome
 ```
 
 ## Getting Started

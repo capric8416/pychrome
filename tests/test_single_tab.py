@@ -11,6 +11,7 @@ def close_all_tabs(browser):
     if len(browser.list_tab()) == 0:
         return
 
+    logging.debug("[*] recycle")
     for tab in browser.list_tab():
         try:
             tab.stop()
@@ -185,10 +186,7 @@ def test_del_event_listener():
     tab.Network.requestWillBeSent = None
     tab.start()
     tab.Network.enable()
-    try:
-        tab.Page.navigate(url="http://www.fatezero.org")
-    except pychrome.UserAbortException:
-        pass
+    tab.Page.navigate(url="http://www.fatezero.org")
 
     if tab.wait(timeout=5):
         assert False, "never get here"
