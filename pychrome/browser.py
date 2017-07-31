@@ -31,15 +31,15 @@ class Browser(object):
         else:
             self.tabs = self.all_tabs[self.dev_url]
 
-    def new_tab(self, url=None):
+    def new_tab(self, url=None, timeout=None):
         url = url or ''
-        rp = requests.get("%s/json/new?%s" % (self.dev_url, url), json=True)
+        rp = requests.get("%s/json/new?%s" % (self.dev_url, url), json=True, timeout=timeout)
         tab = Tab(**rp.json())
         self.tabs[tab.id] = tab
         return tab
 
-    def list_tab(self):
-        rp = requests.get("%s/json" % self.dev_url, json=True)
+    def list_tab(self, timeout=None):
+        rp = requests.get("%s/json" % self.dev_url, json=True, timeout=timeout)
         tabs_map = {}
         for tab_json in rp.json():
             if tab_json['type'] != 'page':
@@ -53,23 +53,23 @@ class Browser(object):
         self.tabs = tabs_map
         return list(self.tabs.values())
 
-    def activate_tab(self, tab_id):
+    def activate_tab(self, tab_id, timeout=None):
         if isinstance(tab_id, Tab):
             tab_id = tab_id.id
 
-        rp = requests.get("%s/json/activate/%s" % (self.dev_url, tab_id))
+        rp = requests.get("%s/json/activate/%s" % (self.dev_url, tab_id), timeout=timeout)
         return rp.text
 
-    def close_tab(self, tab_id):
+    def close_tab(self, tab_id, timeout=None):
         if isinstance(tab_id, Tab):
             tab_id = tab_id.id
 
-        rp = requests.get("%s/json/close/%s" % (self.dev_url, tab_id))
+        rp = requests.get("%s/json/close/%s" % (self.dev_url, tab_id), timeout=timeout)
         self.tabs.pop(tab_id, None)
         return rp.text
 
-    def version(self):
-        rp = requests.get("%s/json/version" % self.dev_url, json=True)
+    def version(self, timeout=None):
+        rp = requests.get("%s/json/version" % self.dev_url, json=True, timeout=timeout)
         return rp.json()
 
     def __str__(self):

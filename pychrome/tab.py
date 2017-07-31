@@ -182,6 +182,9 @@ class Tab(object):
             raise RuntimeException("Tab has been started")
 
         self._stopped.clear()
+        if self.ws:
+            self.ws.close()
+
         self.ws = websocket.create_connection(self.websocket_url)
         self.recv_th = threading.Thread(target=self._recv_loop, daemon=True)
         self.handle_event_th = threading.Thread(target=self._handle_event_loop, daemon=True)
@@ -192,7 +195,7 @@ class Tab(object):
         if self._stopped.is_set():
             raise RuntimeException("Tab has been stopped")
 
-        logging.debug("[*] stop tab %s" % self.id)
+        logger.debug("[*] stop tab %s" % self.id)
 
         self._stopped.set()
         self.ws.close()
