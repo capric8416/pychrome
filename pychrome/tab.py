@@ -104,7 +104,7 @@ class Tab(object):
 
             raise UserAbortException("user abort, call stop() when sending method")
         finally:
-            self.method_results.pop(message['id'])
+            self.method_results.pop(message['id'], None)
 
     def _recv_loop(self):
         while not self._stopped.is_set():

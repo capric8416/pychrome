@@ -130,6 +130,68 @@ browser.close_tab(tab)
 more methods or events could be found in
 [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/tot/)
 
+## API
+
+### Browser
+
+``` python
+Browser.new_tab(self, url=None, timeout=None)
+
+Browser.list_tab(self, timeout=None)
+
+Browser.activate_tab(self, tab_id, timeout=None)
+
+Browser.close_tab(self, tab_id, timeout=None)
+
+Browser.version(self, timeout=None):
+```
+
+### Tab
+
+``` python
+
+Tab.start()
+"""
+return None
+raise RuntimeException
+"""
+
+Tab.stop()
+"""
+return None
+raise RuntimeException
+"""
+
+# when you call Tab.Page.navigate or something else, actually you are calling Tab.call_method
+Tab.call_method(self, _method, *args, **kwargs)
+"""
+return dict
+raise CallMethodException, RuntimeException, TimeoutException, UserAbortException
+"""
+
+# when you set/del event listener, you are calling Tab.set_listener
+Tab.set_listener(self, event, callback)
+"""
+return bool
+raise RuntimeException
+"""
+
+Tab.get_listener(self, event)
+"""
+return func, None
+"""
+
+Tab.del_all_listeners(self)
+"""
+return None
+"""
+
+Tab.wait(self, timeout=None)
+"""
+return bool
+"""
+```
+
 ## Tab management
 
 run `pychrome -h` for more info
@@ -150,7 +212,6 @@ $ pychrome new http://www.fatezero.org
 $ pychrome close 557d8315-e909-466c-bf20-f5a6133ebd89
 Target is closing
 ```
-
 
 ## Examples
 

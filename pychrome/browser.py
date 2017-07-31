@@ -21,21 +21,21 @@ logger = logging.getLogger(__name__)
 
 
 class Browser(object):
-    all_tabs = {}
+    _all_tabs = {}
 
     def __init__(self, url="http://127.0.0.1:9222"):
         self.dev_url = url
 
-        if self.dev_url not in self.all_tabs:
-            self.tabs = self.all_tabs[self.dev_url] = {}
+        if self.dev_url not in self._all_tabs:
+            self._tabs = self._all_tabs[self.dev_url] = {}
         else:
-            self.tabs = self.all_tabs[self.dev_url]
+            self._tabs = self._all_tabs[self.dev_url]
 
     def new_tab(self, url=None, timeout=None):
         url = url or ''
         rp = requests.get("%s/json/new?%s" % (self.dev_url, url), json=True, timeout=timeout)
         tab = Tab(**rp.json())
-        self.tabs[tab.id] = tab
+        self._tabs[tab.id] = tab
         return tab
 
     def list_tab(self, timeout=None):
@@ -45,13 +45,13 @@ class Browser(object):
             if tab_json['type'] != 'page':
                 continue
 
-            if tab_json['id'] in self.tabs:
-                tabs_map[tab_json['id']] = self.tabs[tab_json['id']]
+            if tab_json['id'] in self._tabs:
+                tabs_map[tab_json['id']] = self._tabs[tab_json['id']]
             else:
                 tabs_map[tab_json['id']] = Tab(**tab_json)
 
-        self.tabs = tabs_map
-        return list(self.tabs.values())
+        self._tabs = tabs_map
+        return list(self._tabs.values())
 
     def activate_tab(self, tab_id, timeout=None):
         if isinstance(tab_id, Tab):
@@ -65,7 +65,7 @@ class Browser(object):
             tab_id = tab_id.id
 
         rp = requests.get("%s/json/close/%s" % (self.dev_url, tab_id), timeout=timeout)
-        self.tabs.pop(tab_id, None)
+        self._tabs.pop(tab_id, None)
         return rp.text
 
     def version(self, timeout=None):
