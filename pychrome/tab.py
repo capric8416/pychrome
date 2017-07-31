@@ -81,7 +81,7 @@ class Tab(object):
         with self.ws_send_lock:
             self.ws.send(json.dumps(message))
 
-        if timeout > 1:
+        if not isinstance(timeout, (int, float)) or timeout > 1:
             q_timeout = 1
         else:
             q_timeout = timeout / 2.0
@@ -89,13 +89,15 @@ class Tab(object):
         try:
             while not self._stopped.is_set():
                 try:
-                    if timeout < q_timeout:
-                        q_timeout = timeout
+                    if isinstance(timeout, (int, float)):
+                        if timeout < q_timeout:
+                            q_timeout = timeout
 
-                    timeout -= q_timeout
+                        timeout -= q_timeout
+
                     return self.method_results[message['id']].get(timeout=q_timeout)
                 except queue.Empty:
-                    if timeout <= 0:
+                    if isinstance(timeout, (int, float)) and timeout <= 0:
                         raise TimeoutException("Send command %s timeout" % message['method'])
 
                     continue
