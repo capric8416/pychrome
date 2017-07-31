@@ -105,7 +105,10 @@ def test_reuse_tab():
     for tab in tabs:
         tab.start()
         tab.Network.enable()
-        tab.Page.navigate(url="http://www.fatezero.org/")
+        try:
+            tab.Page.navigate(url="http://www.fatezero.org/")
+        except pychrome.UserAbortException:
+            pass
 
     for tab in tabs:
         if not tab.wait(timeout=5):
