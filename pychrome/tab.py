@@ -192,6 +192,8 @@ class Tab(object):
         if self._stopped.is_set():
             raise RuntimeException("Tab has been stopped")
 
+        logging.debug("[*] stop tab %s" % self.id)
+
         self._stopped.set()
         self.ws.close()
 
