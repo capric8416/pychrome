@@ -7,6 +7,16 @@
 
 A Python Package for the Google Chrome Dev Protocol
 
+## Table of Contents
+
+* [Installation](#installation)
+* [Setup Chrome](#setup-chrome)
+* [Getting Started](#getting-started)
+* [API](#api)
+* [Tab management](#tab-management)
+* [Examples](#examples)
+* [Ref](#ref)
+
 
 ## Installation
 
