@@ -251,3 +251,17 @@ def test_use_callable_class_event_listener():
 
     if tab.wait(timeout=5):
         assert False, "never get here"
+
+
+def test_websocket():
+    import websocket
+    browser = pychrome.Browser()
+    tab = browser.new_tab()
+
+    url = tab.websocket_url
+    tab.stop()
+
+    for i in range(1000):
+        conn = websocket.create_connection(url)
+        conn.send('{}')
+        conn.close()
