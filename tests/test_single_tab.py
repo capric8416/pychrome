@@ -148,6 +148,7 @@ def test_reuse_tab():
         assert False, "never get here"
 
     tab = browser.list_tab()[0]
+    tab.Network.requestWillBeSent = request_will_be_sent
     tab.Network.enable()
     try:
         tab.Page.navigate(url="http://www.fatezero.org")

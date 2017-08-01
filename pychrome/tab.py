@@ -89,9 +89,6 @@ class Tab(object):
         self.handle_event_th.start()
 
     def _send(self, message, timeout=None):
-        if self._stopped.is_set():
-            raise RuntimeException("Tab is not started")
-
         if 'id' not in message:
             self.cur_id += 1
             message['id'] = self.cur_id
@@ -200,7 +197,7 @@ class Tab(object):
         if not self._started.is_set() and not self._stopped.is_set():
             return Tab.status_initial
         if self._started.is_set() and not self._stopped.is_set():
-            return Tab.status_running
+            return Tab.status_started
         if self._started.is_set() and self._stopped.is_set():
             return Tab.status_stopped
         else:

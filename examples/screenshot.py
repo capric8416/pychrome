@@ -73,7 +73,6 @@ def main():
         tab.Page.frameStartedLoading = eh.frame_started_loading
         tab.Page.frameStoppedLoading = eh.frame_stopped_loading
 
-        tab.start()
         tab.Page.stopLoading()
         tab.Page.enable()
         tab.Page.navigate(url=urls[i])

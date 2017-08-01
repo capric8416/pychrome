@@ -102,6 +102,7 @@ def test_reuse_tab():
 
     tabs = browser.list_tab()
     for tab in tabs:
+        tab.Network.requestWillBeSent = functools.partial(request_will_be_sent, tab)
         tab.Network.enable()
         try:
             tab.Page.navigate(url="http://www.fatezero.org/")
