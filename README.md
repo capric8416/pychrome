@@ -79,9 +79,6 @@ def request_will_be_sent(**kwargs):
 
 tab.Network.requestWillBeSent = request_will_be_sent
 
-# start handle events and ready to call method
-tab.start()
-
 # call method
 tab.Network.enable()
 # call method with timeout
@@ -116,7 +113,6 @@ def request_will_be_sent(**kwargs):
 
 tab.set_listener("Network.requestWillBeSent", request_will_be_sent)
 
-tab.start()
 tab.call_method("Network.enable")
 tab.call_method("Page.navigate", url="https://github.com/fate0/pychrome", _timeout=5)
 

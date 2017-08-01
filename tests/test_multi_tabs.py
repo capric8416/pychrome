@@ -79,37 +79,3 @@ def test_set_event_listener():
     for tab in tabs:
         if not tab.wait(timeout=5):
             assert False, "never get here"
-
-
-def test_reuse_tab():
-    browser = pychrome.Browser()
-    tabs = new_multi_tabs(browser, 10)
-
-    def request_will_be_sent(tab, **kwargs):
-        tab.stop()
-
-    for tab in tabs:
-        tab.Network.requestWillBeSent = functools.partial(request_will_be_sent, tab)
-        tab.Network.enable()
-        try:
-            tab.Page.navigate(url="chrome://newtab/")
-        except pychrome.UserAbortException:
-            pass
-
-    for tab in tabs:
-        if not tab.wait(timeout=5):
-            assert False, "never get here"
-
-    tabs = browser.list_tab()
-    for tab in tabs:
-        tab.Network.requestWillBeSent = functools.partial(request_will_be_sent, tab)
-        tab.Network.enable()
-        try:
-            tab.Page.navigate(url="http://www.fatezero.org/")
-        except pychrome.UserAbortException:
-            pass
-
-    for tab in tabs:
-        if not tab.wait(timeout=5):
-            assert False, "never get here"
-

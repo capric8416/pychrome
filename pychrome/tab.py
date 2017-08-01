@@ -4,8 +4,8 @@
 from __future__ import unicode_literals
 
 import json
-import requests
 import logging
+import warnings
 import functools
 import threading
 
@@ -77,10 +77,7 @@ class Tab(object):
             return
 
         if not self.websocket_url:
-            raise RuntimeException("Has another client connect to this tab")
-
-        if self._stopped.is_set():
-            raise RuntimeException("Tab has been stopped")
+            raise RuntimeException("Already has another client connect to this tab")
 
         self._started.set()
         self._stopped.clear()
@@ -116,11 +113,11 @@ class Tab(object):
                     return self.method_results[message['id']].get(timeout=q_timeout)
                 except queue.Empty:
                     if isinstance(timeout, (int, float)) and timeout <= 0:
-                        raise TimeoutException("Send command %s timeout" % message['method'])
+                        raise TimeoutException("Calling %s timeout" % message['method'])
 
                     continue
 
-            raise UserAbortException("user abort, call stop() when sending method")
+            raise UserAbortException("User abort, call stop() when calling %s" % message['method'])
         finally:
             self.method_results.pop(message['id'], None)
 
@@ -157,6 +154,7 @@ class Tab(object):
                     self.event_handlers[event['method']](**event['params'])
                 except Exception as e:
                     logger.error("[-] callback %s error: %s" % (event['method'], str(e)))
+                    warnings.warn("callback %s error: %s" % (event['method'], str(e)))
 
     def __getattr__(self, item):
         attr = GenericAttr(item, self)
@@ -166,6 +164,9 @@ class Tab(object):
     def call_method(self, _method, *args, **kwargs):
         if args:
             raise CallMethodException("the params should be key=value format")
+
+        if self._stopped.is_set():
+            raise RuntimeException("Tab has been stopped")
 
         self._init()
         timeout = kwargs.pop("_timeout", None)
