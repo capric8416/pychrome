@@ -215,3 +215,30 @@ def test_use_callable_class_event_listener():
 
     if not tab.wait(timeout=5):
         assert False, "never get here"
+
+
+def test_status():
+    browser = pychrome.Browser()
+    tab = browser.new_tab()
+
+    assert tab.status() == pychrome.Tab.status_initial
+
+    def request_will_be_sent(**kwargs):
+        tab.stop()
+
+    tab.Network.requestWillBeSent = request_will_be_sent
+
+    assert tab.status() == pychrome.Tab.status_initial
+
+    tab.Network.enable()
+    assert tab.status() == pychrome.Tab.status_started
+
+    try:
+        tab.Page.navigate(url="chrome://newtab/")
+    except pychrome.UserAbortException:
+        pass
+
+    if not tab.wait(timeout=5):
+        assert False, "never get here"
+
+    assert tab.status() == pychrome.Tab.status_stopped
