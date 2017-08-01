@@ -1,5 +1,10 @@
 language: python
-python: 3.5
+python:
+  - "2.7"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.6"
 
 addons:
   chrome: beta
@@ -8,6 +13,7 @@ before_install:
   - google-chrome-beta --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
 
 env:
+  - TOXENV=py36
   - TOXENV=py35
   - TOXENV=py34
   - TOXENV=py33
