@@ -259,7 +259,6 @@ def test_websocket():
     tab = browser.new_tab()
 
     url = tab.websocket_url
-    tab.stop()
 
     for i in range(1000):
         conn = websocket.create_connection(url)
