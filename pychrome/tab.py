@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import json
+import requests
 import logging
 import functools
 import threading
@@ -184,6 +185,12 @@ class Tab(object):
         self._stopped.clear()
         if self.ws:
             self.ws.close()
+
+        self.ws = None
+
+        # TODO: testting
+        rp = requests.get("http://localhost:9222/json", json=True)
+        print(json.dumps(rp.json()))
 
         self.ws = websocket.create_connection(self.websocket_url)
         self.recv_th = threading.Thread(target=self._recv_loop, daemon=True)
