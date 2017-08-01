@@ -38,7 +38,6 @@ def test_normal_callmethod():
     browser = pychrome.Browser()
     tab = browser.new_tab()
 
-    tab.start()
     result = tab.Page.navigate(url="http://www.fatezero.org")
     assert result['frameId']
 
@@ -53,7 +52,6 @@ def test_invalid_method():
     browser = pychrome.Browser()
     tab = browser.new_tab()
 
-    tab.start()
     try:
         tab.Page.NotExistMethod()
         assert False, "never get here"
@@ -65,7 +63,6 @@ def test_invalid_params():
     browser = pychrome.Browser()
     tab = browser.new_tab()
 
-    tab.start()
     try:
         tab.Page.navigate()
         assert False, "never get here"
@@ -98,7 +95,6 @@ def test_set_event_listener():
         tab.stop()
 
     tab.Network.requestWillBeSent = request_will_be_sent
-    tab.start()
     tab.Network.enable()
     try:
         tab.Page.navigate(url="chrome://newtab/")
@@ -117,7 +113,6 @@ def test_get_event_listener():
         tab.stop()
 
     tab.Network.requestWillBeSent = request_will_be_sent
-    tab.start()
     tab.Network.enable()
     try:
         tab.Page.navigate(url="chrome://newtab/")
@@ -143,7 +138,6 @@ def test_reuse_tab():
         tab.stop()
 
     tab.Network.requestWillBeSent = request_will_be_sent
-    tab.start()
     tab.Network.enable()
     try:
         tab.Page.navigate(url="chrome://newtab/")
@@ -153,7 +147,7 @@ def test_reuse_tab():
     if not tab.wait(timeout=5):
         assert False, "never get here"
 
-    tab.start()
+    tab = browser.list_tab()[0]
     tab.Network.enable()
     try:
         tab.Page.navigate(url="http://www.fatezero.org")
@@ -172,7 +166,6 @@ def test_del_event_listener():
         tab.stop()
 
     tab.Network.requestWillBeSent = request_will_be_sent
-    tab.start()
     tab.Network.enable()
     try:
         tab.Page.navigate(url="chrome://newtab/")
@@ -182,9 +175,9 @@ def test_del_event_listener():
     if not tab.wait(timeout=5):
         assert False, "never get here"
 
+    tab = browser.list_tab()[0]
     # simply set None
     tab.Network.requestWillBeSent = None
-    tab.start()
     tab.Network.enable()
     tab.Page.navigate(url="http://www.fatezero.org")
 
@@ -200,7 +193,6 @@ def test_del_all_event_listener():
         tab.stop()
 
     tab.Network.requestWillBeSent = request_will_be_sent
-    tab.start()
     tab.Network.enable()
     try:
         tab.Page.navigate(url="chrome://newtab/")
@@ -210,9 +202,9 @@ def test_del_all_event_listener():
     if not tab.wait(timeout=5):
         assert False, "never get here"
 
+    tab = browser.list_tab()[0]
     # delete all listener
     tab.del_all_listeners()
-    tab.start()
     tab.Network.enable()
     tab.Page.navigate(url="http://www.fatezero.org")
 
@@ -233,7 +225,6 @@ def test_use_callable_class_event_listener():
     tab = browser.new_tab()
 
     tab.Network.requestWillBeSent = CallableClass(tab)
-    tab.start()
     tab.Network.enable()
     try:
         tab.Page.navigate(url="chrome://newtab/")
@@ -243,24 +234,11 @@ def test_use_callable_class_event_listener():
     if not tab.wait(timeout=5):
         assert False, "never get here"
 
+    tab = browser.list_tab()[0]
     # delete all listener
     tab.del_all_listeners()
-    tab.start()
     tab.Network.enable()
     tab.Page.navigate(url="http://www.fatezero.org")
 
     if tab.wait(timeout=5):
         assert False, "never get here"
-
-
-def test_websocket():
-    import websocket
-    browser = pychrome.Browser()
-    tab = browser.new_tab()
-
-    url = tab.websocket_url
-
-    for i in range(1000):
-        conn = websocket.create_connection(url)
-        conn.send('{}')
-        conn.close()

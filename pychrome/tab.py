@@ -44,6 +44,10 @@ class GenericAttr(object):
 
 
 class Tab(object):
+    status_initial = 1
+    status_started = 2
+    status_stopped = 3
+
     def __init__(self, **kwargs):
         self.id = kwargs.get("id")
         self.url = kwargs.get("url")
@@ -62,11 +66,27 @@ class Tab(object):
         self.ws = None
         self.ws_send_lock = threading.Lock()
 
-        self.recv_th = None
-        self.handle_event_th = None
+        self.recv_th = threading.Thread(target=self._recv_loop, daemon=True)
+        self.handle_event_th = threading.Thread(target=self._handle_event_loop, daemon=True)
 
         self._stopped = threading.Event()
-        self._stopped.set()
+        self._started = threading.Event()
+
+    def _init(self):
+        if self._started.is_set():
+            return
+
+        if not self.websocket_url:
+            raise RuntimeException("Has another client connect to this tab")
+
+        if self._stopped.is_set():
+            raise RuntimeException("Tab has been stopped")
+
+        self._started.set()
+        self._stopped.clear()
+        self.ws = websocket.create_connection(self.websocket_url)
+        self.recv_th.start()
+        self.handle_event_th.start()
 
     def _send(self, message, timeout=None):
         if self._stopped.is_set():
@@ -150,6 +170,7 @@ class Tab(object):
         if args:
             raise CallMethodException("the params should be key=value format")
 
+        self._init()
         timeout = kwargs.pop("_timeout", None)
         result = self._send({"method": _method, "params": kwargs}, timeout=timeout)
         if 'result' not in result and 'error' in result:
@@ -175,32 +196,22 @@ class Tab(object):
         self.event_handlers = {}
         return True
 
-    def start(self):
-        if not self.websocket_url:
-            raise RuntimeException("Has another client connect to this tab")
-
-        if not self._stopped.is_set():
-            raise RuntimeException("Tab has been started")
-
-        self._stopped.clear()
-        if self.ws:
-            self.ws.close()
-
-        self.ws = None
-
-        # TODO: testting
-        rp = requests.get("http://localhost:9222/json", json=True)
-        print(json.dumps(rp.json()))
-
-        self.ws = websocket.create_connection(self.websocket_url)
-        self.recv_th = threading.Thread(target=self._recv_loop, daemon=True)
-        self.handle_event_th = threading.Thread(target=self._handle_event_loop, daemon=True)
-        self.recv_th.start()
-        self.handle_event_th.start()
+    def status(self):
+        if not self._started.is_set() and not self._stopped.is_set():
+            return Tab.status_initial
+        if self._started.is_set() and not self._stopped.is_set():
+            return Tab.status_running
+        if self._started.is_set() and self._stopped.is_set():
+            return Tab.status_stopped
+        else:
+            raise RuntimeException("Tab Unknown status")
 
     def stop(self):
         if self._stopped.is_set():
             raise RuntimeException("Tab has been stopped")
+
+        if not self._started.is_set():
+            raise RuntimeException("Tab is not running")
 
         logger.debug("[*] stop tab %s" % self.id)
 
@@ -208,6 +219,7 @@ class Tab(object):
         self.ws.close()
 
     def wait(self, timeout=None):
+        self._init()
         return self._stopped.wait(timeout)
 
     def __str__(self):

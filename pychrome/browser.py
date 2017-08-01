@@ -45,7 +45,7 @@ class Browser(object):
             if tab_json['type'] != 'page':
                 continue
 
-            if tab_json['id'] in self._tabs:
+            if tab_json['id'] in self._tabs and self._tabs[tab_json['id']].status() != Tab.status_stopped:
                 tabs_map[tab_json['id']] = self._tabs[tab_json['id']]
             else:
                 tabs_map[tab_json['id']] = Tab(**tab_json)

@@ -50,7 +50,6 @@ def test_normal_callmethod():
     tabs = new_multi_tabs(browser, 10)
 
     for tab in tabs:
-        tab.start()
         result = tab.Page.navigate(url="http://www.fatezero.org")
         assert result['frameId']
 
@@ -71,7 +70,6 @@ def test_set_event_listener():
 
     for tab in tabs:
         tab.Network.requestWillBeSent = functools.partial(request_will_be_sent, tab)
-        tab.start()
         tab.Network.enable()
         try:
             tab.Page.navigate(url="chrome://newtab/")
@@ -92,7 +90,6 @@ def test_reuse_tab():
 
     for tab in tabs:
         tab.Network.requestWillBeSent = functools.partial(request_will_be_sent, tab)
-        tab.start()
         tab.Network.enable()
         try:
             tab.Page.navigate(url="chrome://newtab/")
@@ -103,8 +100,8 @@ def test_reuse_tab():
         if not tab.wait(timeout=5):
             assert False, "never get here"
 
+    tabs = browser.list_tab()
     for tab in tabs:
-        tab.start()
         tab.Network.enable()
         try:
             tab.Page.navigate(url="http://www.fatezero.org/")
