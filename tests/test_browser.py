@@ -51,8 +51,23 @@ def test_browser_new():
     browser.new_tab()
     tabs = browser.list_tab()
     assert len(tabs) == 1
-    
-    
+
+
+def test_browser_activate_tab():
+    browser = pychrome.Browser()
+    tabs = []
+    for i in range(10):
+        tabs.append(browser.new_tab())
+
+    for tab in tabs:
+        browser.activate_tab(tab)
+
+
+def test_browser_str():
+    browser = pychrome.Browser()
+    assert str(browser) == '<Browser %s>' % browser.dev_url
+
+
 def test_browser_tabs_map():
     browser = pychrome.Browser()
 
