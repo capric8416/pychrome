@@ -24,6 +24,7 @@ class EventHandler(object):
 
     def request_intercepted(self, interceptionId, request, **kwargs):
         if self.is_first_request:
+            self.is_first_request = False
             headers = request.get('headers', {})
             headers['Test-key'] = 'test-value'
             self.tab.Network.continueInterceptedRequest(
