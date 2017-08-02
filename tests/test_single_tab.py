@@ -290,4 +290,4 @@ def test_callback_exception():
 def test_tab_str():
     browser = pychrome.Browser()
     tab = browser.new_tab()
-    assert str(browser) == '<Tab [%s] %s>' % (tab.id, tab.url)
+    assert str(tab) == '<Tab [%s] %s>' % (tab.id, tab.url)
