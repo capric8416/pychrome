@@ -5,7 +5,7 @@ import logging
 import pychrome
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 def close_all_tabs(browser):
