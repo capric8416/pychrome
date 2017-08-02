@@ -37,6 +37,7 @@ def teardown_function(function):
 def test_chome_version():
     browser = pychrome.Browser()
     browser_version = browser.version()
+    assert isinstance(browser_version, dict)
 
 
 def test_browser_list():
@@ -56,6 +57,7 @@ def test_browser_tabs_map():
     browser = pychrome.Browser()
 
     tab = browser.new_tab()
+    assert tab in browser.list_tab()
     assert tab in browser.list_tab()
 
     browser.close_tab(tab)
