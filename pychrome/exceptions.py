@@ -1,8 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 
 class PyChromeException(Exception):
     pass
@@ -26,5 +24,3 @@ class TimeoutException(PyChromeException):
 
 class RuntimeException(PyChromeException):
     pass
-
-

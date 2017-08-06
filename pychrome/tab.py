@@ -1,26 +1,19 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
+import functools
 import json
 import logging
-import warnings
-import functools
+import queue
 import threading
+import warnings
 
 import websocket
 
-from pychrome.exceptions import *
+from .exceptions import *
 
-try:
-    import Queue as queue
-except ImportError:
-    import queue
-
-
-__all__ = ["Tab"]
-
+__all__ = ['Tab']
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +24,7 @@ class GenericAttr(object):
         self.__dict__['tab'] = tab
 
     def __getattr__(self, item):
-        method_name = "%s.%s" % (self.name, item)
+        method_name = '{}.{}'.format(self.name, item)
         event_listener = self.tab.get_listener(method_name)
 
         if event_listener:
@@ -40,7 +33,7 @@ class GenericAttr(object):
         return functools.partial(self.tab.call_method, method_name)
 
     def __setattr__(self, key, value):
-        self.tab.set_listener("%s.%s" % (self.name, key), value)
+        self.tab.add_listener('{}.{}'.format(self.name, key), value)
 
 
 class Tab(object):
@@ -49,27 +42,27 @@ class Tab(object):
     status_stopped = 3
 
     def __init__(self, **kwargs):
-        self.id = kwargs.get("id")
-        self.url = kwargs.get("url")
-        self.title = kwargs.get("title")
-        self.type = kwargs.get("type")
-        self.websocket_url = kwargs.get("webSocketDebuggerUrl")
-        self.desc = kwargs.get("description")
+        self.id = kwargs.get('id')
+        self.url = kwargs.get('url')
+        self.title = kwargs.get('title')
+        self.type = kwargs.get('type')
+        self.ws_url = kwargs.get('webSocketDebuggerUrl')
+        self.description = kwargs.get('description')
 
         self.origin_json = kwargs
 
-        self.cur_id = 1000
+        self.current_id = 1000
+
         self.event_handlers = {}
         self.method_results = {}
+
         self.event_queue = queue.Queue()
 
         self.ws = None
         self.ws_send_lock = threading.Lock()
 
-        self.recv_th = threading.Thread(target=self._recv_loop)
-        self.recv_th.daemon = True
-        self.handle_event_th = threading.Thread(target=self._handle_event_loop)
-        self.handle_event_th.daemon = True
+        self.receive_thread = threading.Thread(target=self._receive_loop, daemon=True)
+        self.handle_event_thread = threading.Thread(target=self._handle_event_loop, daemon=True)
 
         self._stopped = threading.Event()
         self._started = threading.Event()
@@ -78,21 +71,23 @@ class Tab(object):
         if self._started.is_set():
             return
 
-        if not self.websocket_url:
-            raise RuntimeException("Already has another client connect to this tab")
+        if not self.ws_url:
+            raise RuntimeException('Already has another client connect to this tab')
 
         self._started.set()
         self._stopped.clear()
-        self.ws = websocket.create_connection(self.websocket_url)
-        self.recv_th.start()
-        self.handle_event_th.start()
+
+        self.ws = websocket.create_connection(self.ws_url)
+
+        self.receive_thread.start()
+        self.handle_event_thread.start()
 
     def _send(self, message, timeout=None):
         if 'id' not in message:
-            self.cur_id += 1
-            message['id'] = self.cur_id
+            self.current_id += 1
+            message['id'] = self.current_id
 
-        logger.debug("[*] send message: %s %s" % (message["id"], message['method']))
+        logger.debug('[*] send message: {} {}'.format(message['id'], message['method']))
         self.method_results[message['id']] = queue.Queue()
 
         with self.ws_send_lock:
@@ -115,15 +110,15 @@ class Tab(object):
                     return self.method_results[message['id']].get(timeout=q_timeout)
                 except queue.Empty:
                     if isinstance(timeout, (int, float)) and timeout <= 0:
-                        raise TimeoutException("Calling %s timeout" % message['method'])
+                        raise TimeoutException('Calling {} timeout'.format(message['method']))
 
                     continue
 
-            raise UserAbortException("User abort, call stop() when calling %s" % message['method'])
+            raise UserAbortException('User abort, call stop() when calling {}'.format(message['method']))
         finally:
             self.method_results.pop(message['id'], None)
 
-    def _recv_loop(self):
+    def _receive_loop(self):
         while not self._stopped.is_set():
             try:
                 self.ws.settimeout(1)
@@ -133,16 +128,16 @@ class Tab(object):
             except (websocket.WebSocketConnectionClosedException, OSError):
                 return
 
-            if "method" in message:
-                logger.debug("[*] recv event: %s" % message["method"])
+            if 'method' in message:
+                logger.debug('[*] receive event: {}'.format(message['method']))
                 self.event_queue.put(message)
 
-            elif "id" in message:
-                logger.debug("[*] recv message: %s" % message["id"])
-                if message["id"] in self.method_results:
+            elif 'id' in message:
+                logger.debug('[*] receive message: {}'.format(message['id']))
+                if message['id'] in self.method_results:
                     self.method_results[message['id']].put(message)
             else:
-                logger.warning("[-] unknown message: %s" % message)
+                logger.warning('[-] unknown message: {}'.format(message))
 
     def _handle_event_loop(self):
         while not self._stopped.is_set():
@@ -155,8 +150,8 @@ class Tab(object):
                 try:
                     self.event_handlers[event['method']](**event['params'])
                 except Exception as e:
-                    logger.error("[-] callback %s error: %s" % (event['method'], str(e)))
-                    warnings.warn("callback %s error: %s" % (event['method'], str(e)))
+                    logger.error('[-] callback {} error: {}'.format(event['method'], e))
+                    warnings.warn('callback {} error: {}'.format(event['method'], e))
 
     def __getattr__(self, item):
         attr = GenericAttr(item, self)
@@ -165,26 +160,26 @@ class Tab(object):
 
     def call_method(self, _method, *args, **kwargs):
         if args:
-            raise CallMethodException("the params should be key=value format")
+            raise CallMethodException('the params should be key=value format')
 
         if self._stopped.is_set():
-            raise RuntimeException("Tab has been stopped")
+            raise RuntimeException('Tab has been stopped')
 
         self._init()
-        timeout = kwargs.pop("_timeout", None)
-        result = self._send({"method": _method, "params": kwargs}, timeout=timeout)
+        timeout = kwargs.pop('_timeout', None)
+        result = self._send({'method': _method, 'params': kwargs}, timeout=timeout)
         if 'result' not in result and 'error' in result:
-            logger.error("[-] %s error: %s" % (_method, result['error']['message']))
-            raise CallMethodException("calling method: %s error: %s" % (_method, result['error']['message']))
+            logger.error('[-] {} error: {}'.format(_method, result['error']['message']))
+            raise CallMethodException('calling method: {} error: {}'.format(_method, result['error']['message']))
 
         return result['result']
 
-    def set_listener(self, event, callback):
+    def add_listener(self, event, callback):
         if not callback:
             return self.event_handlers.pop(event, None)
 
         if not callable(callback):
-            raise RuntimeException("callback should be callable")
+            raise RuntimeException('callback should be callable')
 
         self.event_handlers[event] = callback
         return True
@@ -192,7 +187,14 @@ class Tab(object):
     def get_listener(self, event):
         return self.event_handlers.get(event, None)
 
-    def del_all_listeners(self):
+    def remove_listener(self, event):
+        try:
+            del self.event_handlers[event]
+        except KeyError:
+            return False
+        return True
+
+    def remove_all_listeners(self):
         self.event_handlers = {}
         return True
 
@@ -204,16 +206,16 @@ class Tab(object):
         if self._started.is_set() and self._stopped.is_set():
             return Tab.status_stopped
         else:
-            raise RuntimeException("Tab Unknown status")
+            raise RuntimeException('Tab Unknown status')
 
     def stop(self):
         if self._stopped.is_set():
-            raise RuntimeException("Tab has been stopped")
+            raise RuntimeException('Tab has been stopped')
 
         if not self._started.is_set():
-            raise RuntimeException("Tab is not running")
+            raise RuntimeException('Tab is not running')
 
-        logger.debug("[*] stop tab %s" % self.id)
+        logger.debug('[*] stop tab {}'.format(self.id))
 
         self._stopped.set()
         self.ws.close()
@@ -223,6 +225,6 @@ class Tab(object):
         return self._stopped.wait(timeout)
 
     def __str__(self):
-        return "<Tab [%s] %s>" % (self.id, self.url)
+        return '<Tab [{}] {}>'.format(self.id, self.url)
 
     __repr__ = __str__

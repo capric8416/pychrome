@@ -1,10 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
-from pychrome.browser import *
-from pychrome.tab import *
-from pychrome.exceptions import *
-
-__version__ = '0.1.0'
+from .browser import *
+from .exceptions import *
+from .sniffer import *
+from .tab import *
