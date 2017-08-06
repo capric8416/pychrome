@@ -11,10 +11,32 @@ __all__ = ['Sniffer']
 logger = logging.getLogger(__name__)
 
 
-class Sniffer(object):
+class Sniffer(Browser):
     def __init__(self, chrome_remote_debugging_url='http://localhost:9222'):
-        self.browser = Browser(chrome_remote_debugging_url=chrome_remote_debugging_url)
-        self.tab = self.browser.get_tab()
+        super(Sniffer, self).__init__(chrome_remote_debugging_url=chrome_remote_debugging_url)
+
+        self.tab = self.get_one_tab()
+
+        self.tab.Page.enable()
+        self.tab.Network.enable()
+        self.tab.Network.setRequestInterceptionEnabled(enabled=True)
+
+        # self.tab.Network.resourceChangedPriority = self.network_resource_changed_priority
+        self.tab.Network.requestWillBeSent = self.network_request_well_be_send
+        self.tab.Network.requestServedFromCache = self.network_request_served_from_cache
+        self.tab.Network.responseReceived = self.network_response_received
+        # self.tab.Network.dataReceived = self.network_data_received
+        self.tab.Network.loadingFinished = self.network_loading_finished
+        self.tab.Network.loadingFailed = self.network_loading_failed
+        # self.tab.Network.webSocketWillSendHandshakeRequest = self.network_web_socket_will_send_handshake_request
+        # self.tab.Network.webSocketHandshakeResponseReceived = self.network_web_socket_handshake_response_received
+        # self.tab.Network.webSocketCreated = self.network_web_socket_created
+        # self.tab.Network.webSocketClosed = self.network_web_socket_closed
+        # self.tab.Network.webSocketFrameReceived = self.network_web_socket_frame_received
+        # self.tab.Network.webSocketFrameError = self.network_web_socket_frame_error
+        # self.tab.Network.webSocketFrameSent = self.network_web_socket_frame_sent
+        # self.tab.Network.eventSourceMessageReceived = self.network_event_source_message_received
+        self.tab.Network.requestIntercepted = self.network_request_intercepted
 
     def network_resource_changed_priority(self, **kwargs):
         logger.debug('[*] {} {}'.format(inspect.currentframe().f_code.co_name, kwargs))
@@ -69,31 +91,6 @@ class Sniffer(object):
 
         self.tab.Network.continueInterceptedRequest(**continue_kwargs)
 
-    def open_url(self, url, timeout=10):
-        # self.tab.Network.resourceChangedPriority = self.network_resource_changed_priority
-        self.tab.Network.requestWillBeSent = self.network_request_well_be_send
-        self.tab.Network.requestServedFromCache = self.network_request_served_from_cache
-        self.tab.Network.responseReceived = self.network_response_received
-        # self.tab.Network.dataReceived = self.network_data_received
-        self.tab.Network.loadingFinished = self.network_loading_finished
-        self.tab.Network.loadingFailed = self.network_loading_failed
-        # self.tab.Network.webSocketWillSendHandshakeRequest = self.network_web_socket_will_send_handshake_request
-        self.tab.Network.webSocketHandshakeResponseReceived = self.network_web_socket_handshake_response_received
-        # self.tab.Network.webSocketCreated = self.network_web_socket_created
-        # self.tab.Network.webSocketClosed = self.network_web_socket_closed
-        # self.tab.Network.webSocketFrameReceived = self.network_web_socket_frame_received
-        # self.tab.Network.webSocketFrameError = self.network_web_socket_frame_error
-        # self.tab.Network.webSocketFrameSent = self.network_web_socket_frame_sent
-        # self.tab.Network.eventSourceMessageReceived = self.network_event_source_message_received
-        self.tab.Network.requestIntercepted = self.network_request_intercepted
-
-        self.tab.Page.enable()
-        self.tab.Network.enable()
-        self.tab.Network.setRequestInterceptionEnabled(enabled=True)
-
+    def open_url(self, url, selector='', timeout=10):
         self.tab.Page.navigate(url=url, _timeout=timeout)
-
-        self.tab.wait(timeout=timeout * 2)
-
-        # self.tab.stop()
-        # self.browser.close_tab(self.tab)
+        return self.tab.wait(selector=selector, timeout=timeout)

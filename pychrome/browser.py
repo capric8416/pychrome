@@ -31,31 +31,6 @@ class Browser(object):
         self._tabs[tab.id] = tab
         return tab
 
-    def list_tab(self, timeout=None):
-        resp = requests.get('{}/json'.format(self.chrome_remote_debugging_url, json=True, timeout=timeout))
-        tabs_map = {}
-        for tab_json in resp.json():
-            if tab_json['type'] != 'page':
-                continue
-
-            if tab_json['id'] in self._tabs and self._tabs[tab_json['id']].status() != Tab.status_stopped:
-                tabs_map[tab_json['id']] = self._tabs[tab_json['id']]
-            else:
-                tabs_map[tab_json['id']] = Tab(**tab_json)
-
-        self._tabs = tabs_map
-        return list(self._tabs.values())
-
-    def get_tab(self):
-        tabs = self.list_tab()
-
-        if not tabs:
-            tab = self.new_tab()
-        else:
-            tab = tabs[0]
-
-        return tab
-
     def activate_tab(self, tab_id, timeout=None):
         if isinstance(tab_id, Tab):
             tab_id = tab_id.id
@@ -70,6 +45,31 @@ class Browser(object):
         resp = requests.get('{}/json/close/{}'.format(self.chrome_remote_debugging_url, tab_id), timeout=timeout)
         self._tabs.pop(tab_id, None)
         return resp.text
+
+    def get_all_tabs(self, timeout=None):
+        resp = requests.get('{}/json'.format(self.chrome_remote_debugging_url, json=True, timeout=timeout))
+        tabs_map = {}
+        for tab_json in resp.json():
+            if tab_json['type'] != 'page':
+                continue
+
+            if tab_json['id'] in self._tabs and self._tabs[tab_json['id']].status() != Tab.status_stopped:
+                tabs_map[tab_json['id']] = self._tabs[tab_json['id']]
+            else:
+                tabs_map[tab_json['id']] = Tab(**tab_json)
+
+        self._tabs = tabs_map
+        return list(self._tabs.values())
+
+    def get_one_tab(self):
+        tabs = self.get_all_tabs()
+
+        if not tabs:
+            tab = self.new_tab()
+        else:
+            tab = tabs[0]
+
+        return tab
 
     def version(self, timeout=None):
         resp = requests.get('{}/json/version'.format(self.chrome_remote_debugging_url, json=True, timeout=timeout))

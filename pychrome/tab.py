@@ -5,8 +5,10 @@
 import functools
 import json
 import logging
+import math
 import queue
 import threading
+import time
 import warnings
 
 import websocket
@@ -220,9 +222,60 @@ class Tab(object):
         self._stopped.set()
         self.ws.close()
 
-    def wait(self, timeout=None):
+    def calc_loops(self, sleep, timeout):
+        """
+        Calc loops
+        :param sleep: [int|float], sleep seconds
+        :param timeout: [int|float], timeout seconds
+        :return: sleep seconds, loops
+        """
+        _ = self
+        return sleep, math.ceil(timeout / sleep)
+
+    def wait(self, selector='', timeout=10):
         self._init()
+
+        if selector:
+            seconds, loops = self.calc_loops(sleep=0.1, timeout=timeout)
+            timeout = seconds
+
+            for _ in range(loops):
+                self.DOM.getDocument()
+                ret = self.DOM.performSearch(query=selector, includeUserAgentShadowDOM=False)
+                if ret['resultCount']:
+                    return True
+
+                time.sleep(seconds)
+
         return self._stopped.wait(timeout)
+
+    def query(self, selector, timeout=10, limit=None):
+        self._init()
+
+        seconds, loops = self.calc_loops(sleep=0.1, timeout=timeout)
+
+        nodes = []
+        for _ in range(loops):
+            self.DOM.getDocument()
+            ret = self.DOM.performSearch(query=selector, includeUserAgentShadowDOM=False)
+            if ret['resultCount']:
+                nodes = self.DOM.getSearchResults(
+                    searchId=ret['searchId'], fromIndex=0, toIndex=limit or ret['resultCount'])['nodeIds']
+
+                for index, node_id in enumerate(nodes):
+                    nodes[index] = self.DOM.getOuterHTML(nodeId=node_id)['outerHTML']
+
+                break
+
+        if limit == 1 and nodes:
+            nodes = nodes[0]
+
+        return nodes
+
+    def click(self, selector):
+        selector = selector.replace('"', "'")
+        ret = self.Runtime.evaluate(expression='''document.querySelector("{}").click()'''.format(selector))
+        return ret['result'].get('subtype') != 'error'
 
     def __str__(self):
         return '<Tab [{}] {}>'.format(self.id, self.url)
