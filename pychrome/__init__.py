@@ -4,6 +4,7 @@
 
 from .browser import *
 from .exceptions import *
+from .laucher import *
 from .sniffer import *
 from .tab import *
 

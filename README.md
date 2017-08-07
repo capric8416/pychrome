@@ -6,7 +6,7 @@ A Python Package for the Google Chrome DevTools Protocol
 ## Table of Contents
 
 * [Installation](#installation)
-* [Lauch Chrome](#launch-chrome)
+* [Launch Chrome](#launch-chrome)
 * [References](#references)
 
 
@@ -21,7 +21,7 @@ python setup.py install
 ```
 
 
-## Lauch Chrome
+## Launch Chrome
 
 ```bash
 # normal mode
