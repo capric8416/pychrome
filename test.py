@@ -36,6 +36,22 @@ def test_launcher():
     launcher.stop()
 
 
+def test_proxy():
+    launcher = Launcher(
+        chrome_path='/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
+        extension_path='/Users/capric/pychrome/dynamic_proxy', incognito=False, headless=False, count=1)
+    launcher.start()
+
+    sniffer = Sniffer()
+    status = sniffer.change_proxy(value='http://127.0.0.1:1080', scope='regular')
+    status = sniffer.open_url(url='http://www.howtofindmyipaddress.com/')
+
+    sniffer.tab.wait(timeout=1000)
+    launcher.stop()
+
+
+
 if __name__ == '__main__':
-    test_launcher()
-    test_sniffer()
+    # test_launcher()
+    # test_sniffer()
+    test_proxy()

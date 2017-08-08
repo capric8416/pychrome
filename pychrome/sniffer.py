@@ -94,3 +94,8 @@ class Sniffer(Browser):
     def open_url(self, url, selector='', timeout=10):
         self.tab.Page.navigate(url=url, _timeout=timeout)
         return self.tab.wait(selector=selector, timeout=timeout)
+
+    def change_proxy(self, value, scope):
+        url = f'http://localhost/proxy/change/?value={value}&scope={scope}'
+        return self.open_url(url=url, selector='404', timeout=1) #or \
+               # self.open_url(url=url, selector='This site can’t be reached', timeout=1)

@@ -8,4 +8,4 @@ from .laucher import *
 from .sniffer import *
 from .tab import *
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'

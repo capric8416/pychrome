@@ -1,0 +1,15 @@
+{
+  "name": "Dynamic Proxy",
+  "version": "0.1",
+  "description": "Dynamic Proxy",
+  "manifest_version": 2,
+  "permissions": [
+    "http://localhost/",
+    "proxy",
+    "webRequest"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  }
+}
