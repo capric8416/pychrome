@@ -50,6 +50,7 @@ class Launcher(object):
             '--disable-sync',
             '--disable-web-resources',
             '--enable-automation',
+            '--enable-extensions',
             '--enable-logging',
             '--force-fieldtrials=SiteIsolationExtensions/Control',
             '--ignore-certificate-errors',

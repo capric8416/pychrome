@@ -27,7 +27,7 @@ python setup.py install
 # normal mode
 google-chrome --remote-debugging-port=9222
 
-# or headless mode (chrome version >= 59)
+# or headless mode (chrome version >= 61)
 google-chrome --remote-debugging-port=9222 --headless --disable-gpu
 ```
 
