@@ -49,7 +49,8 @@ class Sniffer(Browser):
         logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_response_received(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        ret = self.tab.Network.getResponseBody(requestId=kwargs['requestId'])
+        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {ret} {kwargs}')
 
     def network_data_received(self, **kwargs):
         logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
