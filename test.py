@@ -43,10 +43,10 @@ def test_proxy():
     launcher.start()
 
     sniffer = Sniffer()
-    status = sniffer.change_proxy(value='http://127.0.0.1:1080', scope='regular')
-    status = sniffer.open_url(url='http://www.howtofindmyipaddress.com/')
+    status = sniffer.change_proxy(
+        scheme='http', host='61.174.226.212', port=10003, scope='regular', url_find_my_ip='http://ip-api.com/json')
+    assert status
 
-    sniffer.tab.wait(timeout=1000)
     launcher.stop()
 
 

@@ -1,51 +1,23 @@
 function set_proxy(url) {
     url = new URL(url)
 
-    let scope = url.searchParams.get('scope')
-
-    // let proxy = url.searchParams.get('value').replace('http://', '').split(':')
-    // let host = proxy[0]
-    // let port = parseInt(proxy[1])
-    let proxy = url.searchParams.get('value')
-
-
-    // let value = {
-    //     mode: 'fixed_servers',
-    //     rules: {
-    //         singleProxy: {
-    //             scheme: 'http',
-    //             host: host,
-    //             port: port
-    //         }
-    //     },
-    //     bypassList: ['localhost', '127.0.0.1']
-    // }
-
-    let value = {
-        mode: 'pac_script',
-        pacScript: {
-            data: `function FindProxyForURL(url, host) {
-                if (host == '127.0.0.1' || host == 'localhost') {
-                    return 'DIRECT'
-                }
-                return 'PROXY ${proxy}'
-            }`
+    let proxy = {
+        scope: url.searchParams.get('scope'),
+        value: {
+            mode: 'fixed_servers',
+            rules: {
+                singleProxy: {
+                    scheme: url.searchParams.get('scheme'),
+                    host: url.searchParams.get('host'),
+                    port: parseInt(url.searchParams.get('port'))
+                },
+                bypassList: ['127.0.0.1', 'localhost', 'http:://127.0.0.1', 'http://localhost']
+            }
         }
     }
 
-
-    chrome.proxy.settings.set(
-        { value: value, scope: scope },
-        function () {
-            // chrome.proxy.settings.get(
-            //     { incognito: true },
-            //     function (details) {
-            //     }
-            // )
-        }
-    )
+    chrome.proxy.settings.set(proxy, function () { })
 }
-
 
 
 chrome.webRequest.onSendHeaders.addListener(
@@ -56,8 +28,3 @@ chrome.webRequest.onSendHeaders.addListener(
     },
     { urls: ['<all_urls>'] }
 )
-
-
-
-chrome.proxy.onProxyError.addListener(function (details) {
-})

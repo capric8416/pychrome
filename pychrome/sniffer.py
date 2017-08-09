@@ -3,6 +3,7 @@
 
 import inspect
 import logging
+import urllib.parse
 
 from .browser import Browser
 
@@ -95,7 +96,11 @@ class Sniffer(Browser):
         self.tab.Page.navigate(url=url, _timeout=timeout)
         return self.tab.wait(selector=selector, timeout=timeout)
 
-    def change_proxy(self, value, scope):
-        url = f'http://localhost/proxy/change/?value={value}&scope={scope}'
-        return self.open_url(url=url, selector='404', timeout=1) #or \
-               # self.open_url(url=url, selector='This site can’t be reached', timeout=1)
+    def change_proxy(self, scheme, host, port, scope, url_find_my_ip=''):
+        query = {'scheme': scheme, 'host': host, 'port': port, 'scope': scope}
+        self.open_url(url='http://localhost/proxy/change/?' + urllib.parse.urlencode(query), timeout=1)
+
+        if not url_find_my_ip:
+            return True
+
+        return self.open_url(url=url_find_my_ip, selector=host)
