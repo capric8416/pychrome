@@ -11,6 +11,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 
 
 def test_sniffer():
+    launcher = Launcher(
+        chrome_path='/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary', count=1)
+    launcher.start()
+
     sniffer = Sniffer()
 
     status = sniffer.open_url(url='https://shop34135992.m.taobao.com/#list?q=韩', selector='h3.d-title')
@@ -28,6 +32,8 @@ def test_sniffer():
 
         status = sniffer.tab.wait('h3.d-title')
 
+    launcher.stop()
+
 
 def test_launcher():
     launcher = Launcher(
@@ -44,7 +50,7 @@ def test_proxy():
 
     sniffer = Sniffer()
     status = sniffer.change_proxy(
-        scheme='http', host='61.174.226.212', port=10003, scope='regular', url_find_my_ip='http://ip-api.com/json')
+        scheme='http', host='183.144.192.179', port=10003, scope='regular', url_find_my_ip='http://ip-api.com/json')
     assert status
 
     launcher.stop()

@@ -30,6 +30,7 @@ class Launcher(object):
             args.extend(['--headless', '--disable-gpu'])
         if self.extension_path:
             args.append(f'--load-extension={self.extension_path}')
+
         if self.mobile_mode:
             window_size = '375,667'
             user_agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 ' \
@@ -38,6 +39,7 @@ class Launcher(object):
             window_size = '1920,1080'
             user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 ' \
                          '(KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
+
         args.extend([
             '--disable-background-networking',
             '--disable-client-side-phishing-detection',
@@ -56,21 +58,21 @@ class Launcher(object):
             '--no-first-run',
             '--no-sandbox',
             '--password-store=basic',
-            '--remote-debugging-port={}'.format(port),
+            f'--remote-debugging-port={port}',
             '--safebrowsing-disable-auto-update',
             '--use-mock-keychain',
-            '--user-agent={}'.format(user_agent),
-            '--user-data-dir=/tmp/.org.chromium.Chromium.{}'.format(port),
-            '--window-size={}'.format(window_size),
+            f'--user-agent={user_agent}',
+            f'--user-data-dir=/tmp/.org.chromium.Chromium.{port}',
+            f'--window-size={window_size}',
         ])
 
         process = subprocess.Popen(args=args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        logger.info('{} chrome:{} {}'.format(inspect.currentframe().f_code.co_name, port, process.pid))
+        logger.info(f'{inspect.currentframe().f_code.co_name} chrome:{port} {process.pid}')
 
         for _ in range(10):
             try:
-                requests.get('http://localhost:{}/json'.format(port), timeout=5, json=True)
+                requests.get(f'http://localhost:{port}/json', timeout=5, json=True)
             except requests.ConnectionError:
                 time.sleep(1)
             else:
@@ -88,9 +90,8 @@ class Launcher(object):
         process.wait(3)
 
         for pid in {item for item in process.stdout.read().decode('utf-8').strip().split()}:
-            logger.info('{} chrome:{} {}'.format(inspect.currentframe().f_code.co_name, port, pid))
-            subprocess.Popen(
-                'kill -9 {}'.format(pid), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait(3)
+            logger.info(f'{inspect.currentframe().f_code.co_name} chrome:{port} {pid}')
+            subprocess.Popen(f'kill -9 {pid}', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait(3)
 
     def _reopen(self, port):
         self._close(port=port)

@@ -26,7 +26,7 @@ class GenericAttr(object):
         self.__dict__['tab'] = tab
 
     def __getattr__(self, item):
-        method_name = '{}.{}'.format(self.name, item)
+        method_name = f'{self.name}.{item}'
         event_listener = self.tab.get_listener(method_name)
 
         if event_listener:
@@ -35,7 +35,7 @@ class GenericAttr(object):
         return functools.partial(self.tab.call_method, method_name)
 
     def __setattr__(self, key, value):
-        self.tab.add_listener('{}.{}'.format(self.name, key), value)
+        self.tab.add_listener(f'{self.name}.{key}', value)
 
 
 class Tab(object):
@@ -89,7 +89,7 @@ class Tab(object):
             self.current_id += 1
             message['id'] = self.current_id
 
-        logger.debug('[*] send message: {} {}'.format(message['id'], message['method']))
+        logger.debug(f'[*] send message: {message["id"]} {message["method"]}')
         self.method_results[message['id']] = queue.Queue()
 
         with self.ws_send_lock:
@@ -112,11 +112,11 @@ class Tab(object):
                     return self.method_results[message['id']].get(timeout=q_timeout)
                 except queue.Empty:
                     if isinstance(timeout, (int, float)) and timeout <= 0:
-                        raise TimeoutException('Calling {} timeout'.format(message['method']))
+                        raise TimeoutException(f'Calling {message["method"]} timeout')
 
                     continue
 
-            raise UserAbortException('User abort, call stop() when calling {}'.format(message['method']))
+            raise UserAbortException(f'User abort, call stop() when calling {message["method"]}')
         finally:
             self.method_results.pop(message['id'], None)
 
@@ -131,15 +131,15 @@ class Tab(object):
                 return
 
             if 'method' in message:
-                logger.debug('[*] receive event: {}'.format(message['method']))
+                logger.debug(f'[*] receive event: {message["method"]}')
                 self.event_queue.put(message)
 
             elif 'id' in message:
-                logger.debug('[*] receive message: {}'.format(message['id']))
+                logger.debug(f'[*] receive message: {message["id"]}')
                 if message['id'] in self.method_results:
                     self.method_results[message['id']].put(message)
             else:
-                logger.warning('[-] unknown message: {}'.format(message))
+                logger.warning(f'[-] unknown message: {message}')
 
     def _handle_event_loop(self):
         while not self._stopped.is_set():
@@ -152,8 +152,7 @@ class Tab(object):
                 try:
                     self.event_handlers[event['method']](**event['params'])
                 except Exception as e:
-                    logger.error('[-] callback {} error: {}'.format(event['method'], e))
-                    warnings.warn('callback {} error: {}'.format(event['method'], e))
+                    logger.error(f'[-] callback {event["method"]} error: {e}')
 
     def __getattr__(self, item):
         attr = GenericAttr(item, self)
@@ -171,8 +170,8 @@ class Tab(object):
         timeout = kwargs.pop('_timeout', None)
         result = self._send({'method': _method, 'params': kwargs}, timeout=timeout)
         if 'result' not in result and 'error' in result:
-            logger.error('[-] {} error: {}'.format(_method, result['error']['message']))
-            raise CallMethodException('calling method: {} error: {}'.format(_method, result['error']['message']))
+            logger.error(f'[-] {_method} error: {result["error"]["message"]}')
+            raise CallMethodException(f'calling method: {_method} error: {result["error"]["message"]}')
 
         return result['result']
 
@@ -217,7 +216,7 @@ class Tab(object):
         if not self._started.is_set():
             raise RuntimeException('Tab is not running')
 
-        logger.debug('[*] stop tab {}'.format(self.id))
+        logger.debug(f'[*] stop tab {self.id}')
 
         self._stopped.set()
         self.ws.close()
@@ -274,10 +273,10 @@ class Tab(object):
 
     def click(self, selector):
         selector = selector.replace('"', "'")
-        ret = self.Runtime.evaluate(expression='''document.querySelector("{}").click()'''.format(selector))
+        ret = self.Runtime.evaluate(expression=f'''document.querySelector("{selector}").click()''')
         return ret['result'].get('subtype') != 'error'
 
     def __str__(self):
-        return '<Tab [{}] {}>'.format(self.id, self.url)
+        return f'<Tab [{self.id}] {self.url}>'
 
     __repr__ = __str__
