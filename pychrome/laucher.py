@@ -3,8 +3,10 @@
 
 import inspect
 import logging
+import shutil
 import subprocess
 import time
+import tarfile
 from multiprocessing.dummy import Pool as ThreadPool
 
 import requests
@@ -13,25 +15,33 @@ logger = logging.getLogger(__name__)
 
 
 class Launcher(object):
-    def __init__(self, chrome_path='google-chrome', incognito=True,
-                 mobile_mode=True, headless=True, extension_path='', from_port=9222, count=1):
-        self.ports = [port for port in range(from_port, from_port + count)]
+    def __init__(self, chrome_path='google-chrome', default_user_data_path='', extension_path='',
+                 incognito=True, headless=True, mobile_device=True, from_port=9222, count=1):
         self.chrome_path = chrome_path
-        self.incognito = incognito
-        self.mobile_mode = mobile_mode
-        self.headless = headless
+        self.default_user_data = default_user_data_path
         self.extension_path = extension_path
+        self.incognito = incognito
+        self.headless = headless
+        self.mobile_device = mobile_device
+        self.ports = [port for port in range(from_port, from_port + count)]
 
     def _open(self, port):
         args = [self.chrome_path]
         if self.incognito:
-            args.append('-incognito')
+            args.append('--incognito')
         if self.headless:
             args.extend(['--headless', '--disable-gpu'])
         if self.extension_path:
             args.append(f'--load-extension={self.extension_path}')
 
-        if self.mobile_mode:
+        user_data_dir = f'/tmp/{port}.com.google.Chrome'
+        shutil.rmtree(path=user_data_dir, ignore_errors=True)
+        if self.default_user_data:
+            tar = tarfile.open(self.default_user_data)
+            tar.extractall(user_data_dir)
+            tar.close()
+
+        if self.mobile_device:
             window_size = '375,667'
             user_agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 ' \
                          '(KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
@@ -50,6 +60,8 @@ class Launcher(object):
             '--disable-sync',
             '--disable-web-resources',
             '--enable-automation',
+            '--enable-devtools-experiments',
+            '--enable-experimental-extension-apis',
             '--enable-extensions',
             '--enable-logging',
             '--force-fieldtrials=SiteIsolationExtensions/Control',
@@ -63,13 +75,13 @@ class Launcher(object):
             '--safebrowsing-disable-auto-update',
             '--use-mock-keychain',
             f'--user-agent={user_agent}',
-            f'--user-data-dir=/tmp/.org.chromium.Chromium.{port}',
+            f'--user-data-dir={user_data_dir}',
             f'--window-size={window_size}',
         ])
 
         process = subprocess.Popen(args=args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        logger.info(f'{inspect.currentframe().f_code.co_name} chrome:{port} {process.pid}')
+        logger.info(f'{self.__class__.__name__}.{inspect.currentframe().f_code.co_name} chrome:{port} {process.pid}')
 
         for _ in range(10):
             try:
@@ -91,7 +103,7 @@ class Launcher(object):
         process.wait(3)
 
         for pid in {item for item in process.stdout.read().decode('utf-8').strip().split()}:
-            logger.info(f'{inspect.currentframe().f_code.co_name} chrome:{port} {pid}')
+            logger.info(f'{self.__class__.__name__}.{inspect.currentframe().f_code.co_name} chrome:{port} {pid}')
             subprocess.Popen(f'kill -9 {pid}', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait(3)
 
     def _reopen(self, port):

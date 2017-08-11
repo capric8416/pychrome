@@ -152,7 +152,7 @@ class Tab(object):
                 try:
                     self.event_handlers[event['method']](**event['params'])
                 except Exception as e:
-                    logger.error(f'[-] callback {event["method"]} error: {e}')
+                    logger.exception(f'[-] callback {event["method"]} error: {e}')
 
     def __getattr__(self, item):
         attr = GenericAttr(item, self)
@@ -259,7 +259,7 @@ class Tab(object):
             ret = self.DOM.performSearch(query=selector, includeUserAgentShadowDOM=False)
             if ret['resultCount']:
                 nodes = self.DOM.getSearchResults(
-                    searchId=ret['searchId'], fromIndex=0, toIndex=limit or ret['resultCount'])['nodeIds']
+                    searchId=ret['searchId'], fromIndex=0, toIndex=min(limit, ret['resultCount'])['nodeIds'])
 
                 for index, node_id in enumerate(nodes):
                     nodes[index] = self.DOM.getOuterHTML(nodeId=node_id)['outerHTML']
@@ -271,9 +271,19 @@ class Tab(object):
 
         return nodes
 
-    def click(self, selector):
+    def click(self, selector, limit_one=True):
         selector = selector.replace('"', "'")
-        ret = self.Runtime.evaluate(expression=f'''document.querySelector("{selector}").click()''')
+
+        if limit_one:
+            expression = f'''document.querySelector("{selector}").click()'''
+        else:
+            expression = f'''
+                for(let element of document.querySelectorAll("{selector}")){{
+                    element.click()
+                }}
+            '''
+
+        ret = self.Runtime.evaluate(expression=expression)
         return ret['result'].get('subtype') != 'error'
 
     def __str__(self):

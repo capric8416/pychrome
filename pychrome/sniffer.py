@@ -40,50 +40,50 @@ class Sniffer(Browser):
         self.tab.Network.requestIntercepted = self.network_request_intercepted
 
     def network_resource_changed_priority(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_request_well_be_send(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_request_served_from_cache(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_response_received(self, **kwargs):
         ret = self.tab.Network.getResponseBody(requestId=kwargs['requestId'])
         logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {ret} {kwargs}')
 
     def network_data_received(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_loading_finished(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_loading_failed(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_web_socket_will_send_handshake_request(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_web_socket_handshake_response_received(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_web_socket_created(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_web_socket_closed(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_web_socket_frame_received(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_web_socket_frame_error(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_web_socket_frame_sent(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_event_source_message_received(self, **kwargs):
-        logger.debug(f'[*] {inspect.currentframe().f_code.co_name} {kwargs}')
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_request_intercepted(self, **kwargs):
         continue_kwargs = {'interceptionId': kwargs.get('interceptionId')}
@@ -105,3 +105,7 @@ class Sniffer(Browser):
             return True
 
         return self.open_url(url=url_find_my_ip, selector=host)
+
+    def enable_extension_in_incognito(self):
+        self.open_url(url='chrome://extensions/', selector='.optional-controls input[focus-type=incognito]')
+        return self.tab.click('.optional-controls input[focus-type=incognito]:not(:checked)', limit_one=False)
