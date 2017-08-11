@@ -45,12 +45,15 @@ def test_launcher():
 def test_proxy():
     launcher = Launcher(
         chrome_path='/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
-        extension_path='/Users/capric/pychrome/dynamic_proxy', incognito=False, headless=False, count=1)
+        extension_path='/Users/capric/pychrome/dynamic_proxy', incognito=True, headless=False, count=1)
     launcher.start()
 
     sniffer = Sniffer()
+    a = sniffer.open_url(url='chrome://extensions/', selector='.optional-controls input[focus-type=incognito]')
+    b = sniffer.enable_extension_in_incognito()
+
     status = sniffer.change_proxy(
-        scheme='http', host='183.144.192.179', port=10003, scope='regular', url_find_my_ip='http://ip-api.com/json')
+        scheme='http', host='183.145.207.135', port=10003, scope='regular', url_find_my_ip='http://ip-api.com/json')
     assert status
 
     launcher.stop()

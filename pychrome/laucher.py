@@ -50,6 +50,8 @@ class Launcher(object):
             '--disable-sync',
             '--disable-web-resources',
             '--enable-automation',
+            '--enable-devtools-experiments',
+            '--enable-experimental-extension-apis',
             '--enable-extensions',
             '--enable-logging',
             '--force-fieldtrials=SiteIsolationExtensions/Control',
@@ -63,7 +65,7 @@ class Launcher(object):
             '--safebrowsing-disable-auto-update',
             '--use-mock-keychain',
             f'--user-agent={user_agent}',
-            f'--user-data-dir=/tmp/.org.chromium.Chromium.{port}',
+            f'--user-data-dir=/tmp/{port}.com.google.Chrome',
             f'--window-size={window_size}',
         ])
 
