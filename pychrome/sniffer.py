@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class Sniffer(Browser):
-    def __init__(self, chrome_remote_debugging_url='http://localhost:9222'):
-        super(Sniffer, self).__init__(chrome_remote_debugging_url=chrome_remote_debugging_url)
+    def __init__(self, remote_debugging_url='http://localhost:9222'):
+        super(Sniffer, self).__init__(remote_debugging_url=remote_debugging_url)
 
         self.tab = self.get_one_tab()
 

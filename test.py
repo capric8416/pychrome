@@ -44,7 +44,7 @@ def test_launcher():
 
 def test_proxy():
     launcher = Launcher(
-        default_user_data_path='/home/capric/data/pychrome/user.data.com.google.Chrome.tar.xz',
+        user_data_path='/home/capric/data/pychrome/user.data.com.google.Chrome.tar.xz',
         extension_path='/home/capric/data/pychrome/dynamic_proxy', incognito=True, headless=False, count=1)
     launcher.start()
 

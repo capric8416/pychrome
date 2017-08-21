@@ -3,6 +3,7 @@
 
 import inspect
 import logging
+import os
 import shutil
 import subprocess
 import time
@@ -15,11 +16,11 @@ logger = logging.getLogger(__name__)
 
 
 class Launcher(object):
-    def __init__(self, chrome_path='google-chrome', default_user_data_path='', extension_path='',
+    def __init__(self, chrome_path='google-chrome', user_data_path='', extension_path='',
                  incognito=True, headless=True, mobile_device=True, from_port=9222, count=1):
-        self.chrome_path = chrome_path
-        self.default_user_data = default_user_data_path
-        self.extension_path = extension_path
+        self.chrome_path = os.path.expanduser(chrome_path)
+        self.user_data = os.path.expanduser(user_data_path)
+        self.extension_path = os.path.expanduser(extension_path)
         self.incognito = incognito
         self.headless = headless
         self.mobile_device = mobile_device
@@ -34,12 +35,7 @@ class Launcher(object):
         if self.extension_path:
             args.append(f'--load-extension={self.extension_path}')
 
-        user_data_dir = f'/tmp/{port}.com.google.Chrome'
-        shutil.rmtree(path=user_data_dir, ignore_errors=True)
-        if self.default_user_data:
-            tar = tarfile.open(self.default_user_data)
-            tar.extractall(user_data_dir)
-            tar.close()
+        user_data_dir = self.reset(port=port)
 
         if self.mobile_device:
             window_size = '375,667'
@@ -124,3 +120,13 @@ class Launcher(object):
 
     def restart(self):
         self._run(func=self._reopen)
+
+    def reset(self, port):
+        user_data_dir = f'/tmp/{port}.com.google.Chrome'
+        shutil.rmtree(path=user_data_dir, ignore_errors=True)
+        if self.user_data:
+            tar = tarfile.open(self.user_data)
+            tar.extractall(user_data_dir)
+            tar.close()
+
+        return user_data_dir
