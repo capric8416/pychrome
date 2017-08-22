@@ -28,3 +28,13 @@ chrome.webRequest.onSendHeaders.addListener(
     },
     { urls: ['<all_urls>'] }
 )
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    chrome.contentSettings.images.set({
+        'scope': 'regular',
+        'setting': 'block',
+        'primaryPattern': '<all_urls>',
+    });
+});
+

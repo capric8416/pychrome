@@ -20,7 +20,7 @@ class Sniffer(Browser):
 
         self.tab.Page.enable()
         self.tab.Network.enable()
-        self.tab.Network.setRequestInterceptionEnabled(enabled=True)
+        # self.tab.Network.setRequestInterceptionEnabled(enabled=True)
 
         # self.tab.Network.resourceChangedPriority = self.network_resource_changed_priority
         self.tab.Network.requestWillBeSent = self.network_request_well_be_send
@@ -37,7 +37,7 @@ class Sniffer(Browser):
         # self.tab.Network.webSocketFrameError = self.network_web_socket_frame_error
         # self.tab.Network.webSocketFrameSent = self.network_web_socket_frame_sent
         # self.tab.Network.eventSourceMessageReceived = self.network_event_source_message_received
-        self.tab.Network.requestIntercepted = self.network_request_intercepted
+        # self.tab.Network.requestIntercepted = self.network_request_intercepted
 
     def network_resource_changed_priority(self, **kwargs):
         logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')

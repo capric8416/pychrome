@@ -6,7 +6,8 @@
   "permissions": [
     "http://localhost/",
     "proxy",
-    "webRequest"
+    "webRequest",
+    "contentSettings"
   ],
   "background": {
     "scripts": ["background.js"],
