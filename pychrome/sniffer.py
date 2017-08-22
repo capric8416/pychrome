@@ -86,6 +86,8 @@ class Sniffer(Browser):
         logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
 
     def network_request_intercepted(self, **kwargs):
+        logger.debug(f'[*] {self.__class__.__name__}.{inspect.currentframe().f_code.co_name} {kwargs}')
+
         continue_kwargs = {'interceptionId': kwargs.get('interceptionId')}
 
         if kwargs.get('resourceType') in {'Image', 'Stylesheet'}:
@@ -99,12 +101,14 @@ class Sniffer(Browser):
 
     def change_proxy(self, scheme, host, port, scope, url_find_my_ip=''):
         query = {'scheme': scheme, 'host': host, 'port': port, 'scope': scope}
-        self.open_url(url='http://localhost/proxy/change/?' + urllib.parse.urlencode(query), timeout=1)
+        status = self.open_url(
+            selector='This site can’t be reached',
+            url='http://localhost/proxy/change/?' + urllib.parse.urlencode(query))
 
         if not url_find_my_ip:
-            return True
+            return status
 
-        return self.open_url(url=url_find_my_ip, selector=host)
+        return status and self.open_url(url=url_find_my_ip, selector=host)
 
     def enable_extension_in_incognito(self):
         self.open_url(url='chrome://extensions/', selector='.optional-controls input[focus-type=incognito]')
