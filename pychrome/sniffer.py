@@ -109,7 +109,3 @@ class Sniffer(Browser):
             return status
 
         return status and self.open_url(url=url_find_my_ip, selector=host)
-
-    def enable_extension_in_incognito(self):
-        self.open_url(url='chrome://extensions/', selector='.optional-controls input[focus-type=incognito]')
-        return self.tab.click('.optional-controls input[focus-type=incognito]:not(:checked)', limit_one=False)

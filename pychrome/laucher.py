@@ -17,10 +17,11 @@ logger = logging.getLogger(__name__)
 
 class Launcher(object):
     def __init__(self, chrome_path='google-chrome', user_data_path='', extension_path='',
-                 incognito=True, headless=True, mobile_device=True, from_port=9222, count=1):
+                 user_agent='', incognito=True, headless=True, mobile_device=True, from_port=9222, count=1):
         self.chrome_path = os.path.expanduser(chrome_path)
         self.user_data = os.path.expanduser(user_data_path)
         self.extension_path = os.path.expanduser(extension_path)
+        self.user_agent = user_agent
         self.incognito = incognito
         self.headless = headless
         self.mobile_device = mobile_device
@@ -38,13 +39,17 @@ class Launcher(object):
         user_data_dir = self.reset(port=port)
 
         if self.mobile_device:
-            window_size = '375,667'
-            user_agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 ' \
-                         '(KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
+            window_size = '750,1334'
+            self.user_agent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 ' \
+                              '(KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
         else:
             window_size = '1920,1080'
-            user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 ' \
-                         '(KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
+            self.user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 ' \
+                              '(KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
+
+        if self.user_agent:
+            if 'iPhone OS 10' in self.user_agent or 'iPhone OS 11' in self.user_agent:
+                window_size = '1242,2208'
 
         args.extend([
             '--disable-background-networking',
@@ -70,7 +75,7 @@ class Launcher(object):
             f'--remote-debugging-port={port}',
             '--safebrowsing-disable-auto-update',
             '--use-mock-keychain',
-            f'--user-agent={user_agent}',
+            f'--user-agent={self.user_agent}',
             f'--user-data-dir={user_data_dir}',
             f'--window-size={window_size}',
         ])
