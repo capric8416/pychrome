@@ -1,7 +1,7 @@
 {
-  "name": "Dynamic Proxy",
+  "name": "xxoo",
   "version": "0.2",
-  "description": "Dynamic Proxy",
+  "description": "xxoo",
   "manifest_version": 2,
   "permissions": [
     "<all_urls>",

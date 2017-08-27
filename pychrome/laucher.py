@@ -16,11 +16,12 @@ logger = logging.getLogger(__name__)
 
 
 class Launcher(object):
-    def __init__(self, chrome_path='google-chrome', user_data_path='', extension_path='',
+    def __init__(self, chrome_path='google-chrome', user_data_path='', extension_path='', proxy_server='',
                  user_agent='', incognito=True, headless=True, mobile_device=True, from_port=9222, count=1):
         self.chrome_path = os.path.expanduser(chrome_path)
         self.user_data = os.path.expanduser(user_data_path)
         self.extension_path = os.path.expanduser(extension_path)
+        self.proxy_server = proxy_server
         self.user_agent = user_agent
         self.incognito = incognito
         self.headless = headless
@@ -35,6 +36,8 @@ class Launcher(object):
             args.extend(['--headless', '--disable-gpu'])
         if self.extension_path:
             args.append(f'--load-extension={self.extension_path}')
+        if self.proxy_server:
+            args.append(f'--proxy-server={self.proxy_server}')
 
         user_data_dir = self.reset(port=port)
 
