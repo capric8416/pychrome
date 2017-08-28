@@ -23,12 +23,12 @@ class Sniffer(Browser):
         # self.tab.Network.setRequestInterceptionEnabled(enabled=True)
 
         # self.tab.Network.resourceChangedPriority = self.network_resource_changed_priority
-        self.tab.Network.requestWillBeSent = self.network_request_well_be_send
-        self.tab.Network.requestServedFromCache = self.network_request_served_from_cache
+        # self.tab.Network.requestWillBeSent = self.network_request_well_be_send
+        # self.tab.Network.requestServedFromCache = self.network_request_served_from_cache
         self.tab.Network.responseReceived = self.network_response_received
         # self.tab.Network.dataReceived = self.network_data_received
-        self.tab.Network.loadingFinished = self.network_loading_finished
-        self.tab.Network.loadingFailed = self.network_loading_failed
+        # self.tab.Network.loadingFinished = self.network_loading_finished
+        # self.tab.Network.loadingFailed = self.network_loading_failed
         # self.tab.Network.webSocketWillSendHandshakeRequest = self.network_web_socket_will_send_handshake_request
         # self.tab.Network.webSocketHandshakeResponseReceived = self.network_web_socket_handshake_response_received
         # self.tab.Network.webSocketCreated = self.network_web_socket_created
@@ -99,13 +99,21 @@ class Sniffer(Browser):
         self.tab.Page.navigate(url=url, _timeout=timeout)
         return self.tab.wait(selector=selector, timeout=timeout)
 
-    def change_proxy(self, scheme, host, port, scope, url_find_my_ip=''):
+    def set_proxy(self, scheme='', host='', port='', scope=''):
         query = {'scheme': scheme, 'host': host, 'port': port, 'scope': scope}
-        status = self.open_url(
+        return self.open_url(
             selector='This site can’t be reached',
             url='http://localhost/proxy/change/?' + urllib.parse.urlencode(query))
 
-        if not url_find_my_ip:
-            return status
+    def clear_browsing_data(self):
+        return self.open_url(url='http://localhost/browsing_data/remove/', selector='This site can’t be reached')
 
-        return status and self.open_url(url=url_find_my_ip, selector=host)
+    def switch_image(self, action='disable'):
+        assert action in ('disable', 'enable')
+        return self.open_url(url=f'http://localhost/image/{action}/', selector='This site can’t be reached')
+
+    def switch_stylesheet(self, action='disable'):
+        assert action in ('disable', 'enable')
+        return self.open_url(url=f'http://localhost/stylesheet/{action}/', selector='This site can’t be reached')
+
+

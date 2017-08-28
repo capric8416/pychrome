@@ -50,8 +50,7 @@ def test_proxy():
 
     sniffer = Sniffer()
 
-    status = sniffer.change_proxy(
-        scheme='http', host='183.145.200.37', port=10003, scope='regular', url_find_my_ip='http://ip-api.com/json')
+    status = sniffer.set_proxy(scheme='http', host='183.145.200.37', port=10003, scope='regular')
     assert status
 
     launcher.stop()
