@@ -16,7 +16,10 @@ class Sniffer(Browser):
     def __init__(self, remote_debugging_url='http://localhost:9222'):
         super(Sniffer, self).__init__(remote_debugging_url=remote_debugging_url)
 
-        self.tab = self.get_one_tab()
+        self.tab = self.new_tab()
+        for tab in self.get_all_tabs():
+            if tab != self.tab:
+                self.close_tab(tab)
 
         self.tab.Page.enable()
         self.tab.Network.enable()
