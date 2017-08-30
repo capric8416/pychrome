@@ -116,9 +116,49 @@
     }
 
 
+    function batch_actions(url) {
+        url = new URL(url)
+
+        let browsing_data = url.searchParams.get('browsing_data')
+        if (validate(browsing_data)) {
+            remove_browsing_data()
+        }
+
+        let image = url.searchParams.get('image')
+        if (validate(image)) {
+            if (image === 'enable') {
+                enable_image()
+            }
+            else if (image === 'disable') {
+                disable_image()
+            }
+        }
+
+        let stylesheet = url.searchParams.get('stylesheet')
+        if (validate(stylesheet)) {
+            if (stylesheet === 'enable') {
+                enable_stylesheet()
+            }
+            else if (stylesheet === 'disable') {
+                disable_stylesheet()
+            }
+        }
+
+        let proxy = url.searchParams.get('proxy')
+        if (validate(proxy)) {
+            proxy = proxy.split('|')
+            let url = `http://localhost/proxy/change/?scope=${proxy[0]}&scheme=${proxy[1]}&host=${proxy[2]}&port=${proxy[3]}`
+            set_proxy(url)
+        }
+    }
+
+
     function map_url_function(details) {
         if (details.type === 'main_frame') {
-            if (details.url.includes('http://localhost/image/enable/')) {
+            if (details.url.includes('http://localhost/batch/actions/')) {
+                batch_actions(details.url)
+            }
+            else if (details.url.includes('http://localhost/image/enable/')) {
                 enable_image()
             }
             else if (details.url.includes('http://localhost/image/disable/')) {

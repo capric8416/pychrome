@@ -98,25 +98,51 @@ class Sniffer(Browser):
 
         self.tab.Network.continueInterceptedRequest(**continue_kwargs)
 
-    def open_url(self, url, selector='', timeout=10):
-        self.tab.Page.navigate(url=url, _timeout=timeout)
-        return self.tab.wait(selector=selector, timeout=timeout)
+    def open_url(self, url, selector='', timeout=10, new_tab=False):
+        if not new_tab:
+            self.tab.Page.navigate(url=url, _timeout=timeout)
+            return self.tab.wait(selector=selector, timeout=timeout)
+        else:
+            tab = self.new_tab()
+            tab.Page.navigate(url=url, _timeout=timeout)
+            status = tab.wait(selector=selector, timeout=timeout)
+            self.close_tab(tab)
+            return status
+
+    def batch_actions(self, image=None, stylesheet=None, browsing_data=None, proxy=None):
+        query = {}
+        if isinstance(image, bool):
+            query['image'] = 'enable' if image else 'disable'
+        if isinstance(stylesheet, bool):
+            query['stylesheet'] = 'enable' if stylesheet else 'disable'
+        if browsing_data:
+            query['browsing_data'] = 'true'
+        if isinstance(proxy, (tuple, list)) and proxy:
+            query['proxy'] = '|'.join([str(item) for item in proxy])
+
+        if not query:
+            return False
+
+        return self.open_url(
+            selector='This site can’t be reached', new_tab=True,
+            url='http://localhost/batch/actions/?' + urllib.parse.urlencode(query))
 
     def set_proxy(self, scheme='', host='', port='', scope=''):
         query = {'scheme': scheme, 'host': host, 'port': port, 'scope': scope}
         return self.open_url(
-            selector='This site can’t be reached',
+            selector='This site can’t be reached', new_tab=True,
             url='http://localhost/proxy/change/?' + urllib.parse.urlencode(query))
 
     def clear_browsing_data(self):
-        return self.open_url(url='http://localhost/browsing_data/remove/', selector='This site can’t be reached')
+        return self.open_url(
+            url='http://localhost/browsing_data/remove/', selector='This site can’t be reached', new_tab=True)
 
     def switch_image(self, action='disable'):
         assert action in ('disable', 'enable')
-        return self.open_url(url=f'http://localhost/image/{action}/', selector='This site can’t be reached')
+        return self.open_url(
+            url=f'http://localhost/image/{action}/', selector='This site can’t be reached', new_tab=True)
 
     def switch_stylesheet(self, action='disable'):
         assert action in ('disable', 'enable')
-        return self.open_url(url=f'http://localhost/stylesheet/{action}/', selector='This site can’t be reached')
-
-
+        return self.open_url(
+            url=f'http://localhost/stylesheet/{action}/', selector='This site can’t be reached', new_tab=True)
