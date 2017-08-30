@@ -14,7 +14,7 @@ A Python Package for the Google Chrome DevTools Protocol
 
 ```bash
 # from github
-pip install -U git+https://github.com/capric8416/pychrome.git
+pip install --upgrade git+https://github.com/capric8416/pychrome.git
 
 # or from source
 python setup.py install
